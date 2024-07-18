@@ -26,6 +26,7 @@ module.exports = {
             {
                 test: /\.ts$/,
                 loader: 'ts-loader',
+                exclude: /node_modules/,
             },
             {
                 test: /\.scss$/i,
@@ -42,6 +43,10 @@ module.exports = {
         static: [
             {
                 directory: path.resolve(__dirname, 'playground'),
+                watch: true,
+            },
+            {
+                directory: path.resolve(__dirname, 'shaders'),
                 watch: true,
             },
         ],
