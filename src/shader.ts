@@ -1,3 +1,5 @@
+import { engine } from "./engine";
+
 export class ShaderFactory {
     device: GPUDevice;
 
@@ -32,7 +34,7 @@ abstract class AbstractShader {
     static labelPrefix = "";
 
     filepath: string;
-    module!: GPUShaderModule;
+    pipeline: GPURenderPipeline;
 
     protected constructor(filepath: string) {
         this.filepath = filepath;
@@ -40,12 +42,26 @@ abstract class AbstractShader {
 
     async init(device: GPUDevice, code: string) {
         const label = `${AbstractShader.labelPrefix}: ${this.filepath}`;
+        const module = device.createShaderModule({ label, code });
 
-        this.module = device.createShaderModule({ label, code });
+        this.pipeline = device.createRenderPipeline({
+            label,
+            layout: 'auto',
+            vertex: {
+                module
+            },
+            fragment: {
+                module: module,
+                targets: [{ format: engine.textureFormat }]
+            },
+            primitive: {
+                topology: "triangle-list",
+            }
+        });
     }
 }
 
-class GraphicsShader extends AbstractShader {
+export class GraphicsShader extends AbstractShader {
     static override labelPrefix = "Graphics shader"
 
     constructor(filepath: string) {
@@ -53,7 +69,7 @@ class GraphicsShader extends AbstractShader {
     }
 }
 
-class ComputeShader extends AbstractShader {
+export class ComputeShader extends AbstractShader {
     static override labelPrefix = "Compute shader"
 
     constructor(filepath: string) {

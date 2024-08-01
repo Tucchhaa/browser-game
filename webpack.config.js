@@ -2,13 +2,13 @@ const path = require('path');
 
 const CleanWebpackPlugin = require('clean-webpack-plugin').CleanWebpackPlugin;
 const miniCss = require('mini-css-extract-plugin');
-
+console.log(path.resolve(__dirname, "build"));
 module.exports = {
     mode: "none",
     entry: "./src/index.ts",
     output: {
         path: path.resolve(__dirname, "build"),
-        filename: "bundle.min.js",
+        filename: "bundle.js",
     },
     resolve: {
         extensions: ['.ts', '.js'],
@@ -20,7 +20,10 @@ module.exports = {
         },
     },
     // TODO: disable when production build is enabled
+
     devtool: 'source-map',
+
+
     module: {
         rules: [
             {
