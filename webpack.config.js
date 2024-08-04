@@ -20,10 +20,7 @@ module.exports = {
         },
     },
     // TODO: disable when production build is enabled
-
     devtool: 'source-map',
-
-
     module: {
         rules: [
             {
@@ -50,6 +47,10 @@ module.exports = {
             },
             {
                 directory: path.resolve(__dirname, 'shaders'),
+                watch: true,
+            },
+            {
+                directory: path.resolve(__dirname, 'assets'),
                 watch: true,
             },
         ],

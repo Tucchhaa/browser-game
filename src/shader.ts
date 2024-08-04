@@ -9,8 +9,9 @@ export class ShaderFactory {
 
     async createGraphicsShader(filepath: string): Promise<GraphicsShader> {
         const instance = new GraphicsShader(filepath);
+        const code = await engine.loader.loadFile(filepath);
 
-        await instance.init(this.device, await this.loadFile(filepath));
+        await instance.init(this.device, code);
 
         return instance;
     }
@@ -18,16 +19,6 @@ export class ShaderFactory {
     async createComputeShader(filepath: string) {
         throw new Error("Not implemented");
     }
-
-    async loadFile(filepath: string) {
-        const response = await fetch(filepath);
-
-        if (response.ok)
-            return await response.text();
-
-        throw new Error(`Failed to load file: ${filepath}`);
-    }
-
 }
 
 abstract class AbstractShader {
@@ -48,7 +39,17 @@ abstract class AbstractShader {
             label,
             layout: 'auto',
             vertex: {
-                module
+                module,
+                buffers: [
+                    {
+                        arrayStride: (3 + 2 + 3) * 4, // pos + uv + normal
+                        attributes: [
+                            { shaderLocation: 0, offset: 0, format: 'float32x3' },
+                            { shaderLocation: 1, offset: 3 * 4, format: 'float32x2' },
+                            { shaderLocation: 2, offset: (3 + 2) * 4, format: 'float32x3', }
+                        ]
+                    }
+                ]
             },
             fragment: {
                 module: module,
@@ -56,7 +57,9 @@ abstract class AbstractShader {
             },
             primitive: {
                 topology: "triangle-list",
-            }
+                cullMode: "none"
+            },
+
         });
     }
 }

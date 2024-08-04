@@ -12,7 +12,12 @@ async function main() {
         throw new Error("WebGPU is not supported on this device");
     }
 
-    engine.init(device, canvas);
+    await engine.init(device, canvas);
 
-    await engine.start();
+    // const car = await engine.loader.loadMesh("car/car.obj");
+    const car = await engine.loader.loadMesh("untitled.obj");
+
+    engine.tree.addGameObject(car);
+
+    engine.start();
 }

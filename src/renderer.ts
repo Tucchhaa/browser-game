@@ -1,6 +1,8 @@
 import {Entity} from "./entity";
 import {engine} from "./engine";
 import {GraphicsShader} from "./shader";
+import {mat4} from "wgpu-matrix";
+import {MeshComponent} from "./engine/components/mesh";
 
 export class Renderer extends Entity {
     device: GPUDevice;
@@ -17,23 +19,56 @@ export class Renderer extends Entity {
     }
 
     render() {
+        const perspective = mat4.identity();
+
+        const uniformBuffer = this.device.createBuffer({
+            size: perspective.byteLength,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+        this.device.queue.writeBuffer(uniformBuffer, 0, perspective);
+
+        const bindGroup = this.device.createBindGroup({
+            layout: this.shader.pipeline.getBindGroupLayout(0),
+            entries: [
+                { binding: 0, resource: { buffer: uniformBuffer } }
+            ]
+        });
+
         const renderPassDescriptor: GPURenderPassDescriptor = {
             colorAttachments: [{
                 clearValue: [0.3, 0.3, 0.3, 1],
                 loadOp: 'clear',
                 storeOp: 'store',
                 view : engine.ctx.getCurrentTexture().createView()
-            }]
+            }],
         };
+
+        const meshes = []
+        const q = [engine.tree.getRoot()];
+
+        while(q.length) {
+            const n = q[0]
+            q.shift()
+
+            if(n.components.get(MeshComponent)) {
+                meshes.push(n.components.get(MeshComponent));
+            }
+
+            q.push(...engine.tree.getChildren(n));
+        }
+        const mesh = meshes[0];
 
         const encoder = this.device.createCommandEncoder();
 
         const pass = encoder.beginRenderPass(renderPassDescriptor);
         pass.setPipeline(this.shader.pipeline);
-        pass.draw(3);
+        pass.setBindGroup(0, bindGroup);
+        pass.setVertexBuffer(0, mesh.vertexBuffer);
+        pass.draw(mesh.vertexCount);
         pass.end();
 
         const commandBuffer = encoder.finish();
+
         this.device.queue.submit([commandBuffer]);
     }
 }

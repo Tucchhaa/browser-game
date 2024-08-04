@@ -17,7 +17,7 @@
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
 
-//    "moduleResolution": "Bundler",
+    "moduleResolution": "Bundler",
     "module": "ESNext",
 
     "lib": ["ESNext", "DOM", "DOM.Iterable"],

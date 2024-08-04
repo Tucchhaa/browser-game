@@ -3,6 +3,7 @@ import { Input } from "./input";
 import { Loader } from "./loader";
 import { ShaderFactory } from "./shader";
 import {Renderer} from "./renderer";
+import {Tree} from "./engine/core/tree";
 
 export class Engine {
     device: GPUDevice;
@@ -10,23 +11,27 @@ export class Engine {
     ctx: GPUCanvasContext;
     textureFormat: GPUTextureFormat;
 
-    loader: Loader;
     input: Input;
+    tree: Tree;
+    loader: Loader;
     shaderFactory: ShaderFactory;
     renderer: Renderer;
 
     constructor() { }
 
-    init(device: GPUDevice, canvas: HTMLCanvasElement) {
+    async init(device: GPUDevice, canvas: HTMLCanvasElement) {
         this.device = device;
         this.canvas = canvas;
 
         this.input = new Input();
+        this.tree = new Tree();
         this.loader = new Loader();
         this.shaderFactory = new ShaderFactory(device);
         this.renderer = new Renderer(device);
 
         this.initCanvas();
+
+        await Entity.setup();
     }
 
     private initCanvas() {
@@ -45,11 +50,9 @@ export class Engine {
         }
     }
 
-    async start() {
-        await Entity.setup();
-
-        this.renderer.render();
-        // this.renderLoop();
+    start() {
+        // this.renderer.render();
+        this.renderLoop();
     }
 
     private renderLoop() {

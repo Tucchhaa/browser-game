@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/obj-file-parser": "^0.5.2",
     "@webgpu/types": "^0.1.44",
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^7.1.2",
@@ -21,5 +22,9 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^5.0.4",
     "wgpu-matrix": "^3.0.1"
+  },
+  "dependencies": {
+    "mtl-file-parser": "^0.3.0",
+    "obj-file-parser": "^0.6.2"
   }
 }
