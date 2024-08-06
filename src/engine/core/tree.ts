@@ -1,5 +1,5 @@
-import {Entity} from "../../entity";
-import {GameObject} from "../../game-object";
+import { GameObject } from "./game-object";
+import { Entity } from "./entity";
 
 export class Tree extends Entity {
     root: Node;

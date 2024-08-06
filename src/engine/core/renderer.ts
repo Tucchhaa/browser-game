@@ -1,10 +1,11 @@
-import {Entity} from "./entity";
-import {engine} from "./engine";
-import {GraphicsShader} from "./shader";
-import {MeshComponent} from "./engine/components/mesh";
-import {CameraComponent} from "./engine/components/camera";
-import {CharacterController} from "./engine/components/character-controller";
-import {MAT4x4_BYTE_LENGTH, VEC4_BYTE_LENGTH} from "./engine/const";
+import { MAT4x4_BYTE_LENGTH, VEC4_BYTE_LENGTH } from "../const";
+import { engine } from "./engine";
+import { Entity } from "./entity";
+import { GraphicsShader } from "./shader";
+import { CameraComponent } from "../components/camera";
+import { CharacterController } from "../components/character-controller";
+import { MeshComponent } from "../components/mesh";
+
 
 class SceneBindGroup {
     readonly device: GPUDevice;

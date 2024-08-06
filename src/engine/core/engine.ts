@@ -2,8 +2,8 @@ import { Entity } from "./entity";
 import { Input } from "./input";
 import { Loader } from "./loader";
 import { ShaderFactory } from "./shader";
-import {Renderer} from "./renderer";
-import {Tree} from "./engine/core/tree";
+import { Renderer } from "./renderer";
+import { Tree } from "./tree";
 
 export class Engine {
     device: GPUDevice;

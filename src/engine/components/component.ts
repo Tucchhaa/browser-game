@@ -1,5 +1,5 @@
-import {Entity} from "../../entity";
-import {GameObject} from "../../game-object";
+import { Entity } from "../core/entity";
+import { GameObject } from "../core/game-object";
 
 export class Component extends Entity {
     gameObject: GameObject;

@@ -1,6 +1,6 @@
-import {GraphicsShader} from "../../shader";
-import {engine} from "../../engine";
-import {Component} from "./component";
+import { Component } from "./component";
+import { GraphicsShader } from "../core/shader";
+import { engine } from "../core/engine";
 
 export class MeshComponent extends Component {
     shader: GraphicsShader | null;

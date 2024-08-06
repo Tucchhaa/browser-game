@@ -1,5 +1,5 @@
-import {Component} from "./component";
-import {mat4, quat, Quat, Vec2, vec3, Vec3} from "wgpu-matrix";
+import { mat4, quat, Quat, Vec3, vec3 } from "wgpu-matrix";
+import { Component } from "./component";
 
 export class Transform extends Component {
     position: Vec3 = vec3.zero();

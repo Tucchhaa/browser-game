@@ -1,7 +1,7 @@
-import {Component} from "./component";
-import {engine} from "../../engine";
-import {quat, vec3} from "wgpu-matrix";
-import {WorldTransform} from "./transform";
+import { Component } from "./component";
+import { engine } from "../core/engine";
+import { quat, vec3 } from "wgpu-matrix";
+import { WorldTransform } from "./transform";
 
 const speed = 0.1;
 const rotationSpeed = 0.02;

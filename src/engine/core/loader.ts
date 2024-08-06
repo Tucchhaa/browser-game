@@ -1,8 +1,8 @@
 import OBJFile from 'obj-file-parser';
-import {GameObject} from "./game-object";
-import {vec3, Vec3} from "wgpu-matrix";
-import {engine} from "./engine";
-import {MeshComponent} from "./engine/components/mesh";
+import { GameObject } from "./game-object";
+import { engine } from "./engine";
+import { vec3, Vec3 } from "wgpu-matrix";
+import { MeshComponent } from "../components/mesh";
 
 export class Loader {
     constructor() { }
