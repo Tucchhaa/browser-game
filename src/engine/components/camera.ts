@@ -1,5 +1,6 @@
 import {Component} from "./component";
 import {mat4, vec3} from "wgpu-matrix";
+import {engine} from "../../engine";
 
 export class CameraComponent extends Component {
     far: number;
@@ -9,16 +10,25 @@ export class CameraComponent extends Component {
     screenWidth!: number;
     screenHeight!: number;
 
+    private resizeObserver: ResizeObserver;
     private aspect!: number;
     
-    constructor(screenWidth: number, screenHeight: number, far: number = 100.0, near: number = 0.1, fov: number = Math.PI * 2 /5) {
+    constructor(far: number = 100.0, near: number = 0.1, fov: number = Math.PI * 2 /5) {
         super();
 
+        const that = this;
         this.far = far;
         this.near = near;
         this.fov = fov;
 
-        this.setScreenSizes(screenWidth, screenHeight);
+        this.resizeObserver = new ResizeObserver(resize);
+        this.resizeObserver.observe(engine.canvas);
+
+        resize();
+
+        function resize() {
+            that.setScreenSizes(engine.canvas.width, engine.canvas.height);
+        }
     }
 
     private setScreenSizes(width: number, height: number) {

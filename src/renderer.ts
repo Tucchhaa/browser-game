@@ -4,6 +4,7 @@ import {GraphicsShader} from "./shader";
 import {mat4, Mat4} from "wgpu-matrix";
 import {MeshComponent} from "./engine/components/mesh";
 import {CameraComponent} from "./engine/components/camera";
+import {CharacterController} from "./engine/components/character-controller";
 
 export class Renderer extends Entity {
     device: GPUDevice;
@@ -21,11 +22,15 @@ export class Renderer extends Entity {
         this.shader = await engine.shaderFactory.createGraphicsShader("base.wgsl");
 
         const cameraObject = engine.tree.spawnGameObject();
-        this.camera = new CameraComponent(window.outerWidth, window.outerHeight);
+        const controller = new CharacterController();
+
+        this.camera = new CameraComponent();
         cameraObject.components.add(this.camera);
+        cameraObject.components.add(controller)
     }
 
     render() {
+        // console.log(this.camera.transform.position)
         const perspective = this.camera.getViewProjectionMatrix();
 
         const uniformBuffer = this.device.createBuffer({

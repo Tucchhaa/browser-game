@@ -5,17 +5,6 @@ export class Entity {
         Entity.entities.push(this);
     }
 
-    static async setup() {
-        for (const entity of Entity.entities) {
-            await entity.setup();
-        }
-    }
-
-    static async teardown() {
-        for (const entity of Entity.entities) {
-            await entity.teardown();
-        }
-    }
 
     async setup() {}
 
@@ -24,4 +13,24 @@ export class Entity {
     beforeRender() {}
 
     afterRender() {}
+
+    static async setup() {
+        for (const entity of Entity.entities)
+            await entity.setup();
+    }
+
+    static async teardown() {
+        for (const entity of Entity.entities)
+            await entity.teardown();
+    }
+
+    static beforeRender() {
+        for (const entity of Entity.entities)
+            entity.beforeRender();
+    }
+
+    static afterRender() {
+        for (const entity of Entity.entities)
+            entity.afterRender();
+    }
 }

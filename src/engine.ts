@@ -20,6 +20,9 @@ export class Engine {
     constructor() { }
 
     async init(device: GPUDevice, canvas: HTMLCanvasElement) {
+        // FOR DEBUGGING
+        (window as any)._$ = this;
+
         this.device = device;
         this.canvas = canvas;
 
@@ -45,8 +48,8 @@ export class Engine {
         new ResizeObserver(resizeCanvas).observe(this.canvas);
 
         function resizeCanvas() {
-            that.canvas.width = window.screen.width;
-            that.canvas.height = window.screen.height;
+            that.canvas.width = window.innerWidth;
+            that.canvas.height = window.innerHeight;
         }
     }
 
@@ -56,7 +59,10 @@ export class Engine {
     }
 
     private renderLoop() {
+        Entity.beforeRender();
         this.renderer.render();
+        Entity.afterRender();
+
         requestAnimationFrame(this.renderLoop.bind(this));
     }
 
