@@ -1,8 +1,9 @@
 import {Entity} from "./entity";
 import {engine} from "./engine";
 import {GraphicsShader} from "./shader";
-import {mat4} from "wgpu-matrix";
+import {mat4, Mat4} from "wgpu-matrix";
 import {MeshComponent} from "./engine/components/mesh";
+import {CameraComponent} from "./engine/components/camera";
 
 export class Renderer extends Entity {
     device: GPUDevice;
@@ -14,12 +15,18 @@ export class Renderer extends Entity {
         this.device = device;
     }
 
+    camera: CameraComponent;
+
     override async setup() {
         this.shader = await engine.shaderFactory.createGraphicsShader("base.wgsl");
+
+        const cameraObject = engine.tree.spawnGameObject();
+        this.camera = new CameraComponent(window.outerWidth, window.outerHeight);
+        cameraObject.components.add(this.camera);
     }
 
     render() {
-        const perspective = mat4.identity();
+        const perspective = this.camera.getViewProjectionMatrix();
 
         const uniformBuffer = this.device.createBuffer({
             size: perspective.byteLength,

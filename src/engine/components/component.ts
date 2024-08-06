@@ -1,11 +1,12 @@
 import {Entity} from "../../entity";
-import {GraphicsShader} from "../../shader";
-import {engine} from "../../engine";
+import {GameObject} from "../../game-object";
 
 export class Component extends Entity {
-    constructor() {
-        super();
+    gameObject: GameObject;
+
+    get transform() { return this.gameObject.transform; }
+
+    attachTo(gameObject: GameObject) {
+        this.gameObject = gameObject;
     }
-
-
 }

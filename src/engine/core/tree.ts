@@ -44,6 +44,14 @@ export class Tree extends Entity {
         return gameObject;
     }
 
+    spawnGameObject() {
+        const gameObject = this.createGameObject();
+
+        this.addGameObject(gameObject);
+
+        return gameObject;
+    }
+
     addChildTo(parent: GameObject, child: GameObject) {
         const parentNode = this.getNodeByGameObject(parent);
         const childNode = this.getNodeByGameObject(child);
