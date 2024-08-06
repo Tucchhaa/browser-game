@@ -6,6 +6,8 @@ struct Camera {
 
 @group(0) @binding(0) var<uniform> camera: Camera;
 
+@group(1) @binding(0) var<uniform> transform: mat4x4f;
+
 @vertex fn vertex_main(
     @location(0) position: vec3f,
     @location(1) uv: vec2f,
@@ -14,7 +16,7 @@ struct Camera {
 ) -> @builtin(position) vec4f {
     var perspective: mat4x4f = camera.projectionMatrix * camera.viewMatrix;
 
-    return perspective * vec4f(position, 1.0);
+    return perspective * transform * vec4f(position, 1.0);
 }
 
 @fragment fn fragment_main() -> @location(0) vec4f {

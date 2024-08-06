@@ -29,8 +29,10 @@ export class Engine {
         this.input = new Input();
         this.tree = new Tree();
         this.loader = new Loader();
-        this.shaderFactory = new ShaderFactory(device);
         this.renderer = new Renderer(device);
+        this.shaderFactory = new ShaderFactory(device, [
+            this.renderer.sceneBindGroupLayout, this.renderer.objectBindGroupLayout
+        ]);
 
         this.initCanvas();
 

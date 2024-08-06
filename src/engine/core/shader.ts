@@ -2,16 +2,18 @@ import { engine } from "./engine";
 
 export class ShaderFactory {
     device: GPUDevice;
+    bindGroupLayouts: GPUBindGroupLayout[];
 
-    constructor(device: GPUDevice) {
+    constructor(device: GPUDevice, bindGroupLayouts: GPUBindGroupLayout[]) {
         this.device = device;
+        this.bindGroupLayouts = bindGroupLayouts;
     }
 
     async createGraphicsShader(filepath: string): Promise<GraphicsShader> {
         const instance = new GraphicsShader(filepath);
         const code = await engine.loader.loadFile(filepath);
 
-        await instance.init(this.device, code);
+        await instance.init(this.device, this.bindGroupLayouts, code);
 
         return instance;
     }
@@ -31,21 +33,17 @@ abstract class AbstractShader {
         this.filepath = filepath;
     }
 
-    async init(device: GPUDevice, code: string) {
+    async init(device: GPUDevice, bindGroupLayouts: GPUBindGroupLayout[], code: string) {
         const label = `${AbstractShader.labelPrefix}: ${this.filepath}`;
         const module = device.createShaderModule({ label, code });
 
-        const sceneBindGroupLayout = device.createBindGroupLayout({
-            entries: [
-                { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
-            ]
-        });
+        // const sceneBindGroupLayout = device.createBindGroupLayout({
+        //     entries: [
+        //         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
+        //     ]
+        // });
 
-        const layout = device.createPipelineLayout({
-            bindGroupLayouts: [
-                sceneBindGroupLayout
-            ]
-        });
+        const layout = device.createPipelineLayout({ bindGroupLayouts });
 
         this.pipeline = device.createRenderPipeline({
             label,

@@ -5,7 +5,8 @@ import { GraphicsShader } from "./shader";
 import { CameraComponent } from "../components/camera";
 import { CharacterController } from "../components/character-controller";
 import { MeshComponent } from "../components/mesh";
-
+import { GameObject } from "./game-object";
+import { vec3 } from "wgpu-matrix";
 
 class SceneBindGroup {
     readonly device: GPUDevice;
@@ -38,12 +39,42 @@ class SceneBindGroup {
     }
 }
 
+class ObjectBindGroup {
+    readonly device: GPUDevice;
+    readonly bindGroup: GPUBindGroup;
+
+    private readonly transformBuffer: GPUBuffer;
+
+    constructor(device: GPUDevice, layout: GPUBindGroupLayout) {
+        this.device = device;
+
+        this.transformBuffer = device.createBuffer({
+            size: MAT4x4_BYTE_LENGTH,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
+        this.bindGroup = device.createBindGroup({
+            layout,
+            entries: [
+                { binding: 0, resource: { buffer: this.transformBuffer } }
+            ]
+        });
+    }
+
+    write(gameObject: GameObject) {
+        this.device.queue.writeBuffer(this.transformBuffer, 0, gameObject.transform.getMatrix());
+    }
+}
+
 export class Renderer extends Entity {
     readonly device: GPUDevice;
     shader: GraphicsShader;
 
     readonly sceneBindGroupLayout: GPUBindGroupLayout;
     private sceneBindGroup: SceneBindGroup;
+
+    readonly objectBindGroupLayout: GPUBindGroupLayout;
+    private objectBindGroup: ObjectBindGroup;
 
     constructor(device: GPUDevice) {
         super();
@@ -56,6 +87,13 @@ export class Renderer extends Entity {
             ]
         });
         this.sceneBindGroup = new SceneBindGroup(device, this.sceneBindGroupLayout);
+
+        this.objectBindGroupLayout = device.createBindGroupLayout({
+            entries: [
+                { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
+            ]
+        });
+        this.objectBindGroup = new ObjectBindGroup(device, this.objectBindGroupLayout);
     }
 
     camera: CameraComponent;
@@ -84,14 +122,16 @@ export class Renderer extends Entity {
         };
 
         const meshes = this.getMeshes();
-
         const encoder = this.device.createCommandEncoder();
-
         const pass = encoder.beginRenderPass(renderPassDescriptor);
+
         pass.setPipeline(this.shader.pipeline);
         pass.setBindGroup(0, this.sceneBindGroup.bindGroup);
+        pass.setBindGroup(1, this.objectBindGroup.bindGroup);
 
         for(const mesh of meshes) {
+            this.objectBindGroup.write(mesh.gameObject);
+
             pass.setVertexBuffer(0, mesh.vertexBuffer);
             pass.draw(mesh.vertexCount);
         }

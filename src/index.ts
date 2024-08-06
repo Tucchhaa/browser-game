@@ -1,4 +1,4 @@
-import { engine } from "./engine";
+import { engine } from "./engine/core/engine";
 
 window.addEventListener('load', main);
 
@@ -14,8 +14,8 @@ async function main() {
 
     await engine.init(device, canvas);
 
-    // const car = await engine.loader.loadMesh("car/car.obj");
-    const car = await engine.loader.loadMesh("untitled.obj");
+    const car = await engine.loader.loadMesh("car/car.obj");
+    // const car = await engine.loader.loadMesh("untitled.obj");
 
     engine.tree.addGameObject(car);
 
