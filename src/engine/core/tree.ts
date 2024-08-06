@@ -59,6 +59,19 @@ export class Tree extends Entity {
         parentNode.addChild(childNode);
     }
 
+    applyToAll(callback: (gameObject: GameObject) => void) {
+        const q = [this.root];
+
+        while(q.length) {
+            const n = q[0];
+
+            callback(n.gameObject);
+
+            q.shift();
+            q.push(...n.children);
+        }
+    }
+
     private getNodeByGameObject(gameObject: GameObject) {
         return this.id_node.get(gameObject.ID);
     }

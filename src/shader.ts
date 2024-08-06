@@ -35,9 +35,21 @@ abstract class AbstractShader {
         const label = `${AbstractShader.labelPrefix}: ${this.filepath}`;
         const module = device.createShaderModule({ label, code });
 
+        const sceneBindGroupLayout = device.createBindGroupLayout({
+            entries: [
+                { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
+            ]
+        });
+
+        const layout = device.createPipelineLayout({
+            bindGroupLayouts: [
+                sceneBindGroupLayout
+            ]
+        });
+
         this.pipeline = device.createRenderPipeline({
             label,
-            layout: 'auto',
+            layout,
             vertex: {
                 module,
                 buffers: [

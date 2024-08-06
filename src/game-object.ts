@@ -38,6 +38,24 @@ class ComponentsManager {
     }
 
     get<T extends Component>(type: ComponentType<T>): T {
-        return this._components.find(c => c instanceof type) as T;
+        const result = this.getOptional(type);
+
+        if(result === null)
+            throw new Error(`Component ${type.name} not found`);
+
+        return result;
+    }
+
+    getAll<T extends Component>(type: ComponentType<T>): T[] {
+        return this._components.filter(c => c instanceof type) as T[];
+    }
+
+    getOptional<T extends Component>(type: ComponentType<T>): T | null {
+        const result = this._components.find(c => c instanceof type) as T;
+
+        if (result)
+            return result;
+
+        return null;
     }
 }

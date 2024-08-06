@@ -1,4 +1,10 @@
-@group(0) @binding(0) var<uniform> perspective: mat4x4f;
+struct Camera {
+    viewMatrix: mat4x4f,
+    projectionMatrix: mat4x4f,
+    position: vec3f
+};
+
+@group(0) @binding(0) var<uniform> camera: Camera;
 
 @vertex fn vertex_main(
     @location(0) position: vec3f,
@@ -6,6 +12,8 @@
     @location(2) normal: vec3f,
     @builtin(vertex_index) index: u32
 ) -> @builtin(position) vec4f {
+    var perspective: mat4x4f = camera.projectionMatrix * camera.viewMatrix;
+
     return perspective * vec4f(position, 1.0);
 }
 
