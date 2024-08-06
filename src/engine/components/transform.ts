@@ -16,15 +16,30 @@ export class Transform extends Component {
         return result;
     }
 
-    translate(v: Vec3) {
-        this.position = vec3.add(this.position, v);
+    translate(v: Vec3, transform?: Transform): void {
+        const { rotation } = transform ?? this;
+
+        // (v as Float32Array)[2] = -(v as Float32Array)[2]!;
+
+        const rotatedVector = vec3.transformQuat(v, quat.conjugate(rotation));
+
+        this.position = vec3.add(this.position, rotatedVector);
     }
 
-    rotate(q: Quat) {
-        this.rotation = quat.mul(this.rotation, q);
+    rotate(q: Quat, transform?: Transform): void {
+        if(transform && transform !== this) {
+            const relativeRotation = quat.mul(quat.mul(transform.rotation, q), quat.conjugate(transform.rotation));
+
+            this.rotation = quat.mul(relativeRotation, this.rotation);
+
+        } else {
+            this.rotation = quat.mul(this.rotation, q);
+        }
     }
 
     scaleBy(v: Vec3) {
         this.scale = vec3.mul(this.scale, v);
     }
 }
+
+export const WorldTransform = new Transform();

@@ -1,8 +1,10 @@
 import {Component} from "./component";
 import {engine} from "../../engine";
-import {vec3} from "wgpu-matrix";
+import {quat, vec3} from "wgpu-matrix";
+import {WorldTransform} from "./transform";
 
 const speed = 0.1;
+const rotationSpeed = 0.02;
 
 export class CharacterController extends Component {
     posX = 0;
@@ -27,13 +29,21 @@ export class CharacterController extends Component {
     }
 
     private move() {
-        let translation = vec3.create(
-            this.posX + this.negX,
-            0,
-            -(this.posY + this.negY),
-        );
-        translation = vec3.mulScalar(translation, speed);
+        if(this.shift) {
+            const yRotation = quat.fromEuler(0,(this.posX + this.negX) * rotationSpeed, 0, 'xyz');
+            const xRotation = quat.fromEuler((this.posY + this.negY) * rotationSpeed, 0, 0, 'xyz');
 
-        this.transform.translate(translation);
+            this.transform.rotate(yRotation);
+            this.transform.rotate(xRotation, WorldTransform);
+        }
+        else {
+            const translation = vec3.create(
+                (this.posX + this.negX) * speed,
+                0,
+                -(this.posY + this.negY) * speed,
+            );
+
+            this.transform.translate(translation);
+        }
     }
 }
