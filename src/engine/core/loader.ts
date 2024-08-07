@@ -35,6 +35,9 @@ export class Loader {
 }
 
 class OBJParser {
+    vertexOffset = 0;
+    textureOffset = 0;
+
     constructor() { }
 
     parse(raw: string): GameObject {
@@ -43,11 +46,14 @@ class OBJParser {
 
         const gameObject = engine.tree.createGameObject();
 
-        // for(const model of obj.models) {
-            const childGameObject = this.parseModel(obj.models[0]);
+        for(const model of obj.models) {
+            const childGameObject = this.parseModel(model);
 
             engine.tree.addChildTo(gameObject, childGameObject);
-        // }
+
+            this.vertexOffset += model.vertices.length;
+            this.textureOffset += model.textureCoords.length;
+        }
 
         return gameObject;
     }
@@ -61,15 +67,15 @@ class OBJParser {
                 const triangle: { pos: Vec3, u: number, v: number}[] = [];
 
                 [0, j, j + 1].map(vertexInd => {
-                    const vertexInfo = face.vertices[vertexInd]!;
+                    const vertex = face.vertices[vertexInd]!;
 
-                    const index = vertexInfo.vertexIndex - 1;
-                    const textureIndex = vertexInfo.textureCoordsIndex - 1;
+                    const vertexIndex = vertex.vertexIndex - this.vertexOffset - 1;
+                    const textureIndex = vertex.textureCoordsIndex - this.textureOffset - 1;
 
-                    const coord = model.vertices[index];
-                    const textureCoord = model.textureCoords[textureIndex];
+                    const pos = model.vertices[vertexIndex];
+                    const tex = model.textureCoords[textureIndex];
 
-                    triangle.push({ pos: vec3.create(coord.x, coord.y, coord.z), u: textureCoord.u, v: 1 - textureCoord.v });
+                    triangle.push({ pos: vec3.create(pos.x, pos.y, pos.z), u: tex.u, v: 1 - tex.v });
                 });
 
                 // TODO: calculate via compute shader
