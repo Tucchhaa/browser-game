@@ -6,9 +6,8 @@ import { CameraComponent } from "../components/camera";
 import { CharacterController } from "../components/character-controller";
 import { MeshComponent } from "../components/mesh";
 import { GameObject } from "./game-object";
-import { vec3 } from "wgpu-matrix";
 
-class SceneBindGroup {
+class SceneData {
     readonly device: GPUDevice;
     readonly bindGroup: GPUBindGroup;
 
@@ -39,42 +38,16 @@ class SceneBindGroup {
     }
 }
 
-class ObjectBindGroup {
-    readonly device: GPUDevice;
-    readonly bindGroup: GPUBindGroup;
 
-    private readonly transformBuffer: GPUBuffer;
-
-    constructor(device: GPUDevice, layout: GPUBindGroupLayout) {
-        this.device = device;
-
-        this.transformBuffer = device.createBuffer({
-            size: MAT4x4_BYTE_LENGTH,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-
-        this.bindGroup = device.createBindGroup({
-            layout,
-            entries: [
-                { binding: 0, resource: { buffer: this.transformBuffer } }
-            ]
-        });
-    }
-
-    write(gameObject: GameObject) {
-        this.device.queue.writeBuffer(this.transformBuffer, 0, gameObject.transform.getMatrix());
-    }
-}
 
 export class Renderer extends Entity {
     readonly device: GPUDevice;
     shader: GraphicsShader;
 
     readonly sceneBindGroupLayout: GPUBindGroupLayout;
-    private sceneBindGroup: SceneBindGroup;
+    readonly meshBindGroupLayout: GPUBindGroupLayout;
 
-    readonly objectBindGroupLayout: GPUBindGroupLayout;
-    private objectBindGroup: ObjectBindGroup;
+    private sceneData: SceneData;
 
     constructor(device: GPUDevice) {
         super();
@@ -86,14 +59,14 @@ export class Renderer extends Entity {
                 { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
             ]
         });
-        this.sceneBindGroup = new SceneBindGroup(device, this.sceneBindGroupLayout);
+        this.sceneData = new SceneData(device, this.sceneBindGroupLayout);
 
-        this.objectBindGroupLayout = device.createBindGroupLayout({
+        this.meshBindGroupLayout = device.createBindGroupLayout({
             entries: [
-                { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
+                { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} },
+                { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: {} }
             ]
         });
-        this.objectBindGroup = new ObjectBindGroup(device, this.objectBindGroupLayout);
     }
 
     camera: CameraComponent;
@@ -110,7 +83,7 @@ export class Renderer extends Entity {
     }
 
     render() {
-        this.sceneBindGroup.write();
+        this.sceneData.write();
 
         const renderPassDescriptor: GPURenderPassDescriptor = {
             colorAttachments: [{
@@ -126,13 +99,14 @@ export class Renderer extends Entity {
         const pass = encoder.beginRenderPass(renderPassDescriptor);
 
         pass.setPipeline(this.shader.pipeline);
-        pass.setBindGroup(0, this.sceneBindGroup.bindGroup);
-        pass.setBindGroup(1, this.objectBindGroup.bindGroup);
+        pass.setBindGroup(0, this.sceneData.bindGroup);
 
         for(const mesh of meshes) {
-            this.objectBindGroup.write(mesh.gameObject);
+            mesh.shaderData.write();
 
+            pass.setBindGroup(1, mesh.shaderData.bindGroup)
             pass.setVertexBuffer(0, mesh.vertexBuffer);
+
             pass.draw(mesh.vertexCount);
         }
 
@@ -147,10 +121,10 @@ export class Renderer extends Entity {
         const result = [];
 
         engine.tree.applyToAll(gameObject => {
-            const mesh = gameObject.components.getOptional(MeshComponent);
+            const meshes = gameObject.components.getAll(MeshComponent);
 
-            if(mesh)
-                result.push(mesh);
+            if(meshes)
+                result.push(...meshes);
         });
 
         return result;

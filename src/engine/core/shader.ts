@@ -11,7 +11,7 @@ export class ShaderFactory {
 
     async createGraphicsShader(filepath: string): Promise<GraphicsShader> {
         const instance = new GraphicsShader(filepath);
-        const code = await engine.loader.loadFile(filepath);
+        const code = await engine.loader.loadTextFile(filepath);
 
         await instance.init(this.device, this.bindGroupLayouts, code);
 
@@ -56,7 +56,7 @@ abstract class AbstractShader {
                         attributes: [
                             { shaderLocation: 0, offset: 0, format: 'float32x3' },
                             { shaderLocation: 1, offset: 3 * 4, format: 'float32x2' },
-                            { shaderLocation: 2, offset: (3 + 2) * 4, format: 'float32x3', }
+                            { shaderLocation: 2, offset: 5 * 4, format: 'float32x3', }
                         ]
                     }
                 ]

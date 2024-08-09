@@ -4,6 +4,8 @@ import { Loader } from "./loader";
 import { ShaderFactory } from "./shader";
 import { Renderer } from "./renderer";
 import { Tree } from "./tree";
+import { Texture } from "../resources/texture";
+import { Material } from "../resources/material";
 
 export class Engine {
     device: GPUDevice;
@@ -31,12 +33,13 @@ export class Engine {
         this.loader = new Loader();
         this.renderer = new Renderer(device);
         this.shaderFactory = new ShaderFactory(device, [
-            this.renderer.sceneBindGroupLayout, this.renderer.objectBindGroupLayout
+            this.renderer.sceneBindGroupLayout, this.renderer.meshBindGroupLayout
         ]);
 
         this.initCanvas();
 
         await Entity.setup();
+        await Texture.setup();
     }
 
     private initCanvas() {
