@@ -5,7 +5,6 @@ import { GraphicsShader } from "./shader";
 import { CameraComponent } from "../components/camera";
 import { CharacterController } from "../components/character-controller";
 import { MeshComponent } from "../components/mesh";
-import { GameObject } from "./game-object";
 
 class SceneData {
     readonly device: GPUDevice;
@@ -49,24 +48,28 @@ export class Renderer extends Entity {
 
     private sceneData: SceneData;
 
-    constructor(device: GPUDevice) {
+    private depthTexture;
+
+    constructor() {
         super();
 
-        this.device = device;
+        this.device = engine.device;
 
-        this.sceneBindGroupLayout = device.createBindGroupLayout({
+        this.sceneBindGroupLayout = this.device.createBindGroupLayout({
             entries: [
                 { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
             ]
         });
-        this.sceneData = new SceneData(device, this.sceneBindGroupLayout);
+        this.sceneData = new SceneData(this.device, this.sceneBindGroupLayout);
 
-        this.meshBindGroupLayout = device.createBindGroupLayout({
+        this.meshBindGroupLayout = this.device.createBindGroupLayout({
             entries: [
                 { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} },
                 { binding: 1, visibility: GPUShaderStage.FRAGMENT, buffer: {} }
             ]
         });
+
+        this.depthTexture = this.createDepthTexture();
     }
 
     camera: CameraComponent;
@@ -92,6 +95,12 @@ export class Renderer extends Entity {
                 storeOp: 'store',
                 view : engine.ctx.getCurrentTexture().createView()
             }],
+            depthStencilAttachment: {
+                depthClearValue: 1.0,
+                depthLoadOp: 'clear',
+                depthStoreOp: 'store',
+                view: this.depthTexture.createView()
+            }
         };
 
         const meshes = this.getMeshes();
@@ -117,6 +126,11 @@ export class Renderer extends Entity {
         this.device.queue.submit([commandBuffer]);
     }
 
+    onResize() {
+        this.depthTexture.destroy();
+        this.depthTexture = this.createDepthTexture();
+    }
+
     private getMeshes() {
         const result = [];
 
@@ -128,5 +142,15 @@ export class Renderer extends Entity {
         });
 
         return result;
+    }
+
+    private createDepthTexture() {
+        const canvasTexture = engine.ctx.getCurrentTexture();
+
+        return this.device.createTexture({
+            size: [canvasTexture.width, canvasTexture.height],
+            format: 'depth24plus',
+            usage: GPUTextureUsage.RENDER_ATTACHMENT,
+        })
     }
 }

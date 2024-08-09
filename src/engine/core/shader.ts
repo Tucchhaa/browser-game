@@ -4,8 +4,8 @@ export class ShaderFactory {
     device: GPUDevice;
     bindGroupLayouts: GPUBindGroupLayout[];
 
-    constructor(device: GPUDevice, bindGroupLayouts: GPUBindGroupLayout[]) {
-        this.device = device;
+    constructor(bindGroupLayouts: GPUBindGroupLayout[]) {
+        this.device = engine.device;
         this.bindGroupLayouts = bindGroupLayouts;
     }
 
@@ -67,9 +67,13 @@ abstract class AbstractShader {
             },
             primitive: {
                 topology: "triangle-list",
-                cullMode: "none"
+                cullMode: "back"
             },
-
+            depthStencil: {
+                depthWriteEnabled: true,
+                depthCompare: 'less',
+                format: 'depth24plus',
+            },
         });
     }
 }

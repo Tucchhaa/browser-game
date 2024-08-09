@@ -5,7 +5,6 @@ import { ShaderFactory } from "./shader";
 import { Renderer } from "./renderer";
 import { Tree } from "./tree";
 import { Texture } from "../resources/texture";
-import { Material } from "../resources/material";
 
 export class Engine {
     device: GPUDevice;
@@ -28,15 +27,15 @@ export class Engine {
         this.device = device;
         this.canvas = canvas;
 
+        this.initCanvas();
+        console.log('after init')
         this.input = new Input();
         this.tree = new Tree();
         this.loader = new Loader();
-        this.renderer = new Renderer(device);
-        this.shaderFactory = new ShaderFactory(device, [
+        this.renderer = new Renderer();
+        this.shaderFactory = new ShaderFactory([
             this.renderer.sceneBindGroupLayout, this.renderer.meshBindGroupLayout
         ]);
-
-        this.initCanvas();
 
         await Entity.setup();
         await Texture.setup();
@@ -55,6 +54,8 @@ export class Engine {
         function resizeCanvas() {
             that.canvas.width = window.innerWidth;
             that.canvas.height = window.innerHeight;
+
+            that.renderer.onResize();
         }
     }
 
