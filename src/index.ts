@@ -1,8 +1,7 @@
-import { engine } from "./engine/core/engine";
-import { CharacterController } from "./engine/components/character-controller";
-import { Camera } from "./engine/components/camera";
-import { DirectLight } from "./engine/components/lights/direct-light";
-import { vec3 } from "wgpu-matrix";
+import { quat, vec3 } from "wgpu-matrix";
+
+import { engine } from "./engine/core";
+import { Camera, DirectLight, CharacterController } from "./engine/components";
 
 window.addEventListener('load', main);
 
@@ -20,6 +19,8 @@ async function main() {
 
     // create camera
     const cameraObject = engine.tree.spawnGameObject();
+    cameraObject.transform.position = vec3.fromValues(0, 2, 5);
+
     const controller = new CharacterController();
 
     const camera = new Camera();
@@ -30,13 +31,20 @@ async function main() {
 
     // create car
     const car = await engine.loader.loadMesh("assets/car/car.obj", "assets/car/car.mtl");
+    car.transform.translate(vec3.create(0, 0.5, 0));
+    engine.tree.addGameObject(car);
+
+    // create ground
+    const ground = await engine.loader.loadMesh("assets/plane.obj", "assets/plane.mtl");
+    ground.transform.scaleBy(vec3.create(10, 1, 10));
+    engine.tree.addGameObject(ground);
 
     // create direct light
     const directLightObject = engine.tree.spawnGameObject();
     const directLight = new DirectLight();
+    directLightObject.transform.rotate(quat.fromEuler(-Math.PI/4, -Math.PI/4, 0, 'yxz'));
     directLightObject.components.add(directLight);
 
-    engine.tree.addGameObject(car);
 
     engine.start();
 }

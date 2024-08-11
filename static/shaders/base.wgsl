@@ -79,5 +79,5 @@ fn calc_direct_light(light: DirectLight, cameraDir: vec3f, normal: vec3f) -> vec
 fn calc_blinn_phong_coef(cameraDir: vec3f, lightDir: vec3f, normal: vec3f) -> f32 {
     var halfway: vec3f = normalize(cameraDir + lightDir);
 
-    return pow(max(dot(normal, halfway), 0.0), 32.0);
+    return pow(max(dot(normal, halfway), 0.0), 32.0 * 5.0);
 }

@@ -68,9 +68,9 @@ class OBJParser {
         }
 
         for(const model of obj.models) {
-            const childGameObject = this.parseModel(model);
+            const child = this.parseModel(model);
 
-            engine.tree.addChildTo(gameObject, childGameObject);
+            engine.tree.addChild(gameObject, child);
 
             this.vertexOffset += model.vertices.length;
             this.textureOffset += model.textureCoords.length;

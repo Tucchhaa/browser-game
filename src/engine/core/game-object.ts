@@ -7,10 +7,15 @@ export class GameObject {
     components: ComponentsManager;
     transform: Transform;
 
+    parent: GameObject;
+    children: GameObject[];
+
     constructor() {
         this.ID = GameObject.generateID();
         this.components = new ComponentsManager(this);
         this.transform = new Transform();
+        this.parent = null;
+        this.children = [];
 
         this.components.add(this.transform);
     }

@@ -52,7 +52,8 @@ export class Renderer extends EngineEventListener {
 
         const renderPassDescriptor: GPURenderPassDescriptor = {
             colorAttachments: [{
-                clearValue: [0.3, 0.3, 0.3, 1],
+                // clearValue: [0.3, 0.3, 0.3, 1],
+                clearValue: [53/255, 68/255, 161/255, 1],
                 loadOp: 'clear',
                 storeOp: 'store',
                 view : engine.ctx.getCurrentTexture().createView()

@@ -1,22 +1,71 @@
-import { mat4, quat, Quat, Vec3, vec3 } from "wgpu-matrix";
+import { Mat4, mat4, quat, Quat, Vec3, vec3 } from "wgpu-matrix";
 
 import { Component } from ".";
 
 export class Transform extends Component {
-    position: Vec3 = vec3.zero();
-    rotation: Quat = quat.identity();
-    scale: Vec3 = vec3.create(1, 1, 1);
+    private _changed: boolean;
 
-    getMatrix() {
-        let result = mat4.identity();
+    private parentAbsolutePosition: Vec3;
+    private parentAbsoluteRotation: Quat;
+    private parentAbsoluteScale: Vec3;
 
-        result = mat4.translate(result, this.position);
-        result = mat4.mul(result, mat4.fromQuat(this.rotation));
-        result = mat4.scale(result, this.scale);
+    private _position: Vec3;
+    private _rotation: Quat;
+    private _scale: Vec3;
 
-        return result;
+    private transformMatrix: Mat4;
+    private direction: Vec3;
+
+    constructor() {
+        super();        
+
+        this._changed = false;
+
+        this.parentAbsolutePosition = this._position = vec3.zero();
+        this.parentAbsoluteRotation = this._rotation = quat.identity();
+        this.parentAbsoluteScale    = this._scale    = vec3.create(1, 1, 1);
+        
+        this.transformMatrix = mat4.identity();
+        this.direction = vec3.create(0, 0, -1);
     }
 
+    get position() { return this._position; }
+    set position(value: Vec3) { this._position = value; this._changed = true; }
+
+    get rotation() { return this._rotation; }
+    set rotation(value: Quat) { this._rotation = value; this._changed = true; }
+
+    get scale() { return this._scale; }
+    set scale(value: Vec3) { this._scale = value; this._changed = true; }
+    
+    getAbsolutePosition() { return vec3.add(this.parentAbsolutePosition, this.position); };
+    getAbsoluteRotation() { return quat.mul(this.parentAbsoluteRotation, this.rotation); };
+    getAbsoluteScale() { return vec3.mul(this.parentAbsoluteScale, this.scale); };
+    
+    getMatrix() { return this.transformMatrix; }
+    getDirection() { return this.direction; }
+
+    updateAbsoluteValues() {
+        const parent = this.gameObject.parent?.transform;
+
+        if(parent?._changed) {
+            this.parentAbsolutePosition = parent.getAbsolutePosition();
+            this.parentAbsoluteRotation = parent.getAbsoluteRotation();
+            this.parentAbsoluteScale = parent.getAbsoluteScale();
+
+            this._changed = true;
+        }
+
+        if(this._changed) {
+            this.recalculate();
+        }
+    }
+    
+    recalculate() {
+        this.transformMatrix = this.recalculateTransformMatrix();
+        this.direction = this.recalculateDirection();
+    }
+    
     translate(v: Vec3, transform?: Transform): void {
         const { rotation } = transform ?? this;
 
@@ -42,8 +91,17 @@ export class Transform extends Component {
         this.scale = vec3.mul(this.scale, v);
     }
 
-    getDirection(): Vec3 {
-        return vec3.transformQuat(vec3.create(0, 0, -1), this.rotation);
+    private recalculateTransformMatrix() {
+        let result = mat4.translation(this.getAbsolutePosition());
+
+        mat4.mul(result, mat4.fromQuat(this.getAbsoluteRotation()), result);
+        mat4.scale(result, this.getAbsoluteScale(), result);
+
+        return result;
+    }
+
+    private recalculateDirection() {
+        return vec3.transformQuat(vec3.create(0, 0, -1), this.getAbsoluteRotation());
     }
 }
 

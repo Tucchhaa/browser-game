@@ -1,46 +1,39 @@
 import { EngineEventListener, GameObject } from ".";
 
 export class Tree extends EngineEventListener {
-    root: Node;
+    readonly root: GameObject;
 
-    private id_node = new Map();
+    constructor() {
+        super();
 
-    override async setup() {
-        this.root = new Node(new GameObject());
-        this.id_node.set(this.root.gameObject.ID, this.root);
+        this.root = new GameObject();
     }
 
-    getRoot() {
-        return this.root.gameObject;
+    addChild(parent: GameObject, child: GameObject) {
+        // assert: parent doesn't already have this child
+
+        if(child.parent)
+            this.removeChild(parent, child);
+
+        parent.children.push(child);
+        child.parent = parent;
     }
 
-    getChildren(gameObject: GameObject): GameObject[] {
-        const node = this.getNodeByGameObject(gameObject);
+    removeChild(parent: GameObject, child: GameObject) {
+        // assert: index is always >= 0
+        const index = parent.children.indexOf(child);
 
-        return node.children.map(n => n.gameObject);
+        parent.children.splice(index, 1);
+
+        child.parent = null;
     }
 
     addGameObject(gameObject: GameObject) {
-        const existingNode = this.id_node.get(gameObject.ID);
-
-        if (existingNode) {
-            this.root.addChild(existingNode);
-            return;
-        }
-
-        const node = new Node(gameObject);
-
-        this.id_node.set(gameObject.ID, node);
-        this.root.addChild(node);
+        this.addChild(this.root, gameObject);
     }
 
     createGameObject() {
-        const gameObject = new GameObject();
-        const node = new Node(gameObject);
-
-        this.id_node.set(gameObject.ID, node);
-
-        return gameObject;
+        return new GameObject();
     }
 
     spawnGameObject() {
@@ -51,53 +44,24 @@ export class Tree extends EngineEventListener {
         return gameObject;
     }
 
-    addChildTo(parent: GameObject, child: GameObject) {
-        const parentNode = this.getNodeByGameObject(parent);
-        const childNode = this.getNodeByGameObject(child);
-
-        parentNode.addChild(childNode);
+    applyToAll(callback: (gameObject: GameObject) => void) {
+        this.traverseChildren(this.root, callback);
     }
 
-    applyToAll(callback: (gameObject: GameObject) => void) {
-        const q = [this.root];
+    updateTransforms() {
+        this.applyToAll(gameObject => gameObject.transform.updateAbsoluteValues());
+    }
+
+    private traverseChildren(gameObject: GameObject, callback: (gameObject: GameObject) => void) {
+        const q = [gameObject];
 
         while(q.length) {
             const n = q[0];
 
-            callback(n.gameObject);
+            callback(n);
 
             q.shift();
             q.push(...n.children);
         }
-    }
-
-    private getNodeByGameObject(gameObject: GameObject) {
-        return this.id_node.get(gameObject.ID);
-    }
-}
-
-class Node {
-    children: Node[] = [];
-    parent: Node | null = null;
-    gameObject: GameObject;
-
-    constructor(gameObject: GameObject) {
-        this.gameObject = gameObject;
-    }
-
-    addChild(child: Node) {
-        child.parent?.removeChild(child);
-
-        this.children.push(child);
-        child.parent = this;
-    }
-
-    removeChild(child: Node) {
-        const index = this.children.indexOf(child);
-
-        // index is always >= 0
-        this.children.splice(index, 1);
-
-        child.parent = null;
     }
 }

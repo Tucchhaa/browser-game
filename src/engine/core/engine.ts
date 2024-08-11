@@ -61,6 +61,8 @@ export class Engine {
 
     private renderLoop() {
         EngineEventListener.beforeRender();
+
+        this.tree.updateTransforms();
         this.renderer.render();
         EngineEventListener.afterRender();
 
