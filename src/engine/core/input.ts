@@ -1,4 +1,4 @@
-import { EngineEventListener } from "./engineEventListener";
+import { EngineEventListener } from "./engine-event-listener";
 
 const keyCodes = [
     'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyW', 'Space', 'ShiftLeft'

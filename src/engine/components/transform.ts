@@ -40,6 +40,10 @@ export class Transform extends Component {
     scaleBy(v: Vec3) {
         this.scale = vec3.mul(this.scale, v);
     }
+
+    getDirection(): Vec3 {
+        return vec3.transformQuat(vec3.create(0, 0, -1), this.rotation);
+    }
 }
 
 export const WorldTransform = new Transform();

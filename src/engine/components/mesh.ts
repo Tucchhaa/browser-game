@@ -6,12 +6,12 @@ import { MAT4x4_BYTE_LENGTH, VEC4_BYTE_LENGTH } from "../const";
 
 class MeshShaderData {
     readonly bindGroup: GPUBindGroup;
-    private readonly mesh: MeshComponent;
+    private readonly mesh: Mesh;
 
     private readonly transformBuffer: GPUBuffer;
     private readonly materialBuffer: GPUBuffer;
 
-    constructor(mesh: MeshComponent) {
+    constructor(mesh: Mesh) {
         this.mesh = mesh;
 
         this.transformBuffer = engine.device.createBuffer({
@@ -42,7 +42,7 @@ class MeshShaderData {
     }
 }
 
-export class MeshComponent extends Component {
+export class Mesh extends Component {
     shader: GraphicsShader | null;
     shaderData: MeshShaderData;
     material: Material;

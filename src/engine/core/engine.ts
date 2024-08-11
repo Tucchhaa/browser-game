@@ -1,4 +1,4 @@
-import { EngineEventListener } from "./engineEventListener";
+import { EngineEventListener } from "./engine-event-listener";
 import { Input } from "./input";
 import { Loader } from "./loader";
 import { ShaderFactory } from "./shader";
@@ -53,8 +53,8 @@ export class Engine {
         new ResizeObserver(resizeCanvas).observe(this.canvas);
 
         function resizeCanvas() {
-            that.canvas.width = window.innerWidth;
-            that.canvas.height = window.innerHeight;
+            that.canvas.width = window.innerWidth * 2;
+            that.canvas.height = window.innerHeight * 2;
 
             that.renderer.onResize();
         }

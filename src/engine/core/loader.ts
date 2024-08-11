@@ -2,8 +2,8 @@ import OBJFile from 'obj-file-parser';
 import MTLFile from 'mtl-file-parser'
 import { GameObject } from "./game-object";
 import { engine } from "./engine";
-import { vec3, Vec3 } from "wgpu-matrix";
-import { MeshComponent } from "../components/mesh";
+import { Vec2, vec2, vec3, Vec3 } from "wgpu-matrix";
+import { Mesh } from "../components/mesh";
 import { Material } from "../resources/material";
 import { Texture } from "../resources/texture";
 
@@ -55,6 +55,7 @@ export class Loader {
 class OBJParser {
     vertexOffset = 0;
     textureOffset = 0;
+    normalOffset = 0;
 
     materials: Map<string, Material> = new Map();
 
@@ -74,6 +75,7 @@ class OBJParser {
 
             this.vertexOffset += model.vertices.length;
             this.textureOffset += model.textureCoords.length;
+            this.normalOffset += model.vertexNormals.length;
         }
 
         return gameObject;
@@ -103,7 +105,7 @@ class OBJParser {
         let currentMaterialName = model.faces[0].material;
 
         const addMesh = () => {
-            const mesh = new MeshComponent(new Float32Array(vertexData), model.name);
+            const mesh = new Mesh(new Float32Array(vertexData), model.name);
             const material = this.materials.get(currentMaterialName);
 
             if(material) {
@@ -124,25 +126,31 @@ class OBJParser {
             }
 
             for(let j=1; j < face.vertices.length - 1; j++) {
-                const triangle: { pos: Vec3, u: number, v: number}[] = [];
+                const triangle: { pos: Vec3, uv: Vec2, normal: Vec3 }[] = [];
 
                 [0, j, j + 1].map(vertexInd => {
                     const vertex = face.vertices[vertexInd]!;
 
                     const vertexIndex = vertex.vertexIndex - this.vertexOffset - 1;
                     const textureIndex = vertex.textureCoordsIndex - this.textureOffset - 1;
+                    const normalIndex = vertex.vertexNormalIndex - this.normalOffset - 1;
 
                     const pos = model.vertices[vertexIndex];
                     const tex = model.textureCoords[textureIndex];
+                    const normal = model.vertexNormals[normalIndex];
 
-                    triangle.push({ pos: vec3.create(pos.x, pos.y, pos.z), u: tex.u, v: 1 - tex.v });
+                    triangle.push({
+                        pos: vec3.create(pos.x, pos.y, pos.z),
+                        uv: vec2.create(tex.u, 1 - tex.v),
+                        normal: vec3.create(normal.x, normal.y, normal.z)
+                    });
                 });
 
                 // TODO: calculate via compute shader
                 // const normal = vec3.cross(vec3.sub(triangle[1]!.pos, triangle[0]!.pos), vec3.sub(triangle[2]!.pos, triangle[0]!.pos));
 
                 for(const vertex of triangle) {
-                    vertexData.push(...vertex.pos, vertex.u, vertex.v, ...[0, 1, 0]);
+                    vertexData.push(...vertex.pos, ...vertex.uv, ...vertex.normal);
                 }
             }
         }
