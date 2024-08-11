@@ -1,10 +1,11 @@
-import { Entity } from "./entity";
+import { EngineEventListener } from "./engineEventListener";
 import { Input } from "./input";
 import { Loader } from "./loader";
 import { ShaderFactory } from "./shader";
 import { Renderer } from "./renderer";
 import { Tree } from "./tree";
 import { Texture } from "../resources/texture";
+import { Scene } from "./scene";
 
 export class Engine {
     device: GPUDevice;
@@ -12,6 +13,7 @@ export class Engine {
     ctx: GPUCanvasContext;
     textureFormat: GPUTextureFormat;
 
+    scene: Scene;
     input: Input;
     tree: Tree;
     loader: Loader;
@@ -26,7 +28,8 @@ export class Engine {
         this.canvas = canvas;
 
         this.initCanvas();
-        console.log('after init')
+
+        this.scene = new Scene();
         this.input = new Input();
         this.tree = new Tree();
         this.loader = new Loader();
@@ -35,7 +38,7 @@ export class Engine {
             this.renderer.sceneBindGroupLayout, this.renderer.meshBindGroupLayout
         ]);
 
-        await Entity.setup();
+        await EngineEventListener.setup();
         await Texture.setup();
     }
 
@@ -63,15 +66,15 @@ export class Engine {
     }
 
     private renderLoop() {
-        Entity.beforeRender();
+        EngineEventListener.beforeRender();
         this.renderer.render();
-        Entity.afterRender();
+        EngineEventListener.afterRender();
 
         requestAnimationFrame(this.renderLoop.bind(this));
     }
 
     async stop() {
-        await Entity.teardown();
+        await EngineEventListener.teardown();
     }
 }
 

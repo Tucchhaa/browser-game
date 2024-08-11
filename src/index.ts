@@ -1,4 +1,6 @@
 import { engine } from "./engine/core/engine";
+import { CharacterController } from "./engine/components/character-controller";
+import { CameraComponent } from "./engine/components/camera";
 
 window.addEventListener('load', main);
 
@@ -14,8 +16,18 @@ async function main() {
 
     await engine.init(device, canvas);
 
+    // create camera
+    const cameraObject = engine.tree.spawnGameObject();
+    const controller = new CharacterController();
+
+    const camera = new CameraComponent();
+    cameraObject.components.add(camera);
+    cameraObject.components.add(controller);
+
+    engine.scene.mainCamera = camera;
+
+    // create car
     const car = await engine.loader.loadMesh("assets/car/car.obj", "assets/car/car.mtl");
-    // const car = await engine.loader.loadMesh("untitled.obj");
 
     engine.tree.addGameObject(car);
 

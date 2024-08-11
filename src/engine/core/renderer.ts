@@ -1,52 +1,18 @@
 import { MAT4x4_BYTE_LENGTH, VEC4_BYTE_LENGTH } from "../const";
 import { engine } from "./engine";
-import { Entity } from "./entity";
+import { EngineEventListener } from "./engineEventListener";
 import { GraphicsShader } from "./shader";
-import { CameraComponent } from "../components/camera";
-import { CharacterController } from "../components/character-controller";
-import { MeshComponent } from "../components/mesh";
 
-class SceneData {
-    readonly device: GPUDevice;
-    readonly bindGroup: GPUBindGroup;
-
-    private readonly cameraBuffer: GPUBuffer;
-
-    constructor(device: GPUDevice, layout: GPUBindGroupLayout) {
-        this.device = device;
-
-        this.cameraBuffer = device.createBuffer({
-            size: MAT4x4_BYTE_LENGTH * 2 + VEC4_BYTE_LENGTH,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
-        });
-
-        this.bindGroup = device.createBindGroup({
-            layout,
-            entries: [
-                { binding: 0, resource: { buffer: this.cameraBuffer } }
-            ]
-        });
-    }
-
-    write() {
-        const camera = engine.renderer.camera;
-
-        this.device.queue.writeBuffer(this.cameraBuffer, 0, camera.getViewMatrix());
-        this.device.queue.writeBuffer(this.cameraBuffer, MAT4x4_BYTE_LENGTH, camera.getProjectionMatrix());
-        this.device.queue.writeBuffer(this.cameraBuffer, MAT4x4_BYTE_LENGTH * 2, camera.transform.position);
-    }
-}
-
-export class Renderer extends Entity {
+export class Renderer extends EngineEventListener {
     readonly device: GPUDevice;
     shader: GraphicsShader;
 
     readonly sceneBindGroupLayout: GPUBindGroupLayout;
     readonly meshBindGroupLayout: GPUBindGroupLayout;
 
-    private sceneData: SceneData;
+    private sceneShaderData: SceneShaderData;
 
-    private depthTexture;
+    private depthTexture: GPUTexture;
 
     constructor() {
         super();
@@ -58,7 +24,7 @@ export class Renderer extends Entity {
                 { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
             ]
         });
-        this.sceneData = new SceneData(this.device, this.sceneBindGroupLayout);
+        this.sceneShaderData = new SceneShaderData(this.device, this.sceneBindGroupLayout);
 
         this.meshBindGroupLayout = this.device.createBindGroupLayout({
             entries: [
@@ -70,21 +36,12 @@ export class Renderer extends Entity {
         this.depthTexture = this.createDepthTexture();
     }
 
-    camera: CameraComponent;
-
     override async setup() {
         this.shader = await engine.shaderFactory.createGraphicsShader("shaders/base.wgsl");
-
-        const cameraObject = engine.tree.spawnGameObject();
-        const controller = new CharacterController();
-
-        this.camera = new CameraComponent();
-        cameraObject.components.add(this.camera);
-        cameraObject.components.add(controller)
     }
 
     render() {
-        this.sceneData.write();
+        this.sceneShaderData.write();
 
         const renderPassDescriptor: GPURenderPassDescriptor = {
             colorAttachments: [{
@@ -101,12 +58,12 @@ export class Renderer extends Entity {
             }
         };
 
-        const meshes = this.getMeshes();
+        const { meshes } = engine.scene.getSceneComponents();
         const encoder = this.device.createCommandEncoder();
         const pass = encoder.beginRenderPass(renderPassDescriptor);
 
         pass.setPipeline(this.shader.pipeline);
-        pass.setBindGroup(0, this.sceneData.bindGroup);
+        pass.setBindGroup(0, this.sceneShaderData.bindGroup);
 
         for(const mesh of meshes) {
             mesh.shaderData.write();
@@ -129,19 +86,6 @@ export class Renderer extends Entity {
         this.depthTexture = this.createDepthTexture();
     }
 
-    private getMeshes() {
-        const result = [];
-
-        engine.tree.applyToAll(gameObject => {
-            const meshes = gameObject.components.getAll(MeshComponent);
-
-            if(meshes)
-                result.push(...meshes);
-        });
-
-        return result;
-    }
-
     private createDepthTexture() {
         const canvasTexture = engine.ctx.getCurrentTexture();
 
@@ -150,5 +94,36 @@ export class Renderer extends Entity {
             format: 'depth24plus',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         });
+    }
+}
+
+class SceneShaderData {
+    readonly device: GPUDevice;
+    readonly bindGroup: GPUBindGroup;
+
+    private readonly cameraBuffer: GPUBuffer;
+
+    constructor(device: GPUDevice, layout: GPUBindGroupLayout) {
+        this.device = device;
+
+        this.cameraBuffer = device.createBuffer({
+            size: MAT4x4_BYTE_LENGTH * 2 + VEC4_BYTE_LENGTH,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
+        this.bindGroup = device.createBindGroup({
+            layout,
+            entries: [
+                { binding: 0, resource: { buffer: this.cameraBuffer } }
+            ]
+        });
+    }
+
+    write() {
+        const camera = engine.scene.mainCamera;
+
+        this.device.queue.writeBuffer(this.cameraBuffer, 0, camera.getViewMatrix());
+        this.device.queue.writeBuffer(this.cameraBuffer, MAT4x4_BYTE_LENGTH, camera.getProjectionMatrix());
+        this.device.queue.writeBuffer(this.cameraBuffer, MAT4x4_BYTE_LENGTH * 2, camera.transform.position);
     }
 }

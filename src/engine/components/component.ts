@@ -1,7 +1,7 @@
-import { Entity } from "../core/entity";
+import { EngineEventListener } from "../core/engineEventListener";
 import { GameObject } from "../core/game-object";
 
-export class Component extends Entity {
+export class Component extends EngineEventListener {
     gameObject: GameObject;
 
     get transform() { return this.gameObject.transform; }

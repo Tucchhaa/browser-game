@@ -1,4 +1,4 @@
-import { Entity } from "./entity";
+import { EngineEventListener } from "./engineEventListener";
 
 const keyCodes = [
     'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyW', 'Space', 'ShiftLeft'
@@ -11,7 +11,7 @@ enum KeyState {
     Pressed,
 }
 
-export class Input extends Entity {
+export class Input extends EngineEventListener {
     private keyStateMap: Map<string, KeyState> = new Map(); // states: down, up, pressed
 
     override async setup() {

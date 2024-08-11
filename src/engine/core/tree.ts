@@ -1,7 +1,7 @@
 import { GameObject } from "./game-object";
-import { Entity } from "./entity";
+import { EngineEventListener } from "./engineEventListener";
 
-export class Tree extends Entity {
+export class Tree extends EngineEventListener {
     root: Node;
 
     private id_node = new Map();
