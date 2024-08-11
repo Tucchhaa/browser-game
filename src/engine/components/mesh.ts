@@ -8,12 +8,18 @@ class MeshShaderData {
     private readonly mesh: Mesh;
 
     private readonly transformBuffer: GPUBuffer;
+    private readonly normalTransformBuffer: GPUBuffer;
     private readonly materialBuffer: GPUBuffer;
 
     constructor(mesh: Mesh) {
         this.mesh = mesh;
 
         this.transformBuffer = engine.device.createBuffer({
+            size: MAT4x4_BYTE_LENGTH,
+            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
+        });
+
+        this.normalTransformBuffer = engine.device.createBuffer({
             size: MAT4x4_BYTE_LENGTH,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
         });
@@ -27,13 +33,16 @@ class MeshShaderData {
             layout: engine.renderer.meshBindGroupLayout,
             entries: [
                 { binding: 0, resource: { buffer: this.transformBuffer } },
-                { binding: 1, resource: { buffer: this.materialBuffer } }
+                { binding: 1, resource: { buffer: this.normalTransformBuffer } },
+                { binding: 2, resource: { buffer: this.materialBuffer } }
             ]
         });
     }
 
     write() {
         engine.device.queue.writeBuffer(this.transformBuffer, 0, this.mesh.transform.getMatrix());
+
+        engine.device.queue.writeBuffer(this.normalTransformBuffer, 0, this.mesh.transform.getNormalMatrix());
 
         engine.device.queue.writeBuffer(this.materialBuffer, 0, this.mesh.material.Kd);
         engine.device.queue.writeBuffer(this.materialBuffer, VEC4_BYTE_LENGTH, this.mesh.material.Ks);

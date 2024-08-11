@@ -35,7 +35,8 @@ struct Vertex {
 @group(0) @binding(2) var<storage, read> pointLights: array<PointLight>;
 
 @group(1) @binding(0) var<uniform> transform: mat4x4f;
-@group(1) @binding(1) var<uniform> material: Material;
+@group(1) @binding(1) var<uniform> normalTransform: mat3x3f;
+@group(1) @binding(2) var<uniform> material: Material;
 
 @vertex fn vertex_main(
     @location(0) position: vec3f,
@@ -50,7 +51,7 @@ struct Vertex {
     vertex.fragPosition = perspective * worldPosition;
     vertex.worldPosition = worldPosition.xyz;
     vertex.uv = uv;
-    vertex.normal = normal;
+    vertex.normal = normalTransform * normal;
 
     return vertex;
 }

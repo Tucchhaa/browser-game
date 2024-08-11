@@ -31,7 +31,8 @@ async function main() {
 
     // create car
     const car = await engine.loader.loadMesh("assets/car/car.obj", "assets/car/car.mtl");
-    car.transform.translate(vec3.create(0, 0.5, 0));
+    car.transform.translate(vec3.create(0, 0.24, 0));
+    car.transform.rotate(quat.fromEuler(0, Math.PI, 0, 'yxz'));
     engine.tree.addGameObject(car);
 
     // create ground

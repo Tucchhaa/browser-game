@@ -1,4 +1,4 @@
-import { Mat4, mat4, quat, Quat, Vec3, vec3 } from "wgpu-matrix";
+import { Mat3, mat3, Mat4, mat4, quat, Quat, Vec3, vec3, vec4 } from "wgpu-matrix";
 
 import { Component } from ".";
 
@@ -14,6 +14,7 @@ export class Transform extends Component {
     private _scale: Vec3;
 
     private transformMatrix: Mat4;
+    private normalMatrix: Mat3;
     private direction: Vec3;
 
     constructor() {
@@ -21,11 +22,16 @@ export class Transform extends Component {
 
         this._changed = false;
 
-        this.parentAbsolutePosition = this._position = vec3.zero();
-        this.parentAbsoluteRotation = this._rotation = quat.identity();
-        this.parentAbsoluteScale    = this._scale    = vec3.create(1, 1, 1);
-        
+        this.parentAbsolutePosition = vec3.zero();
+        this.parentAbsoluteRotation = quat.identity();
+        this.parentAbsoluteScale    = vec3.create(1, 1, 1);
+
+        this._position = vec3.zero();
+        this._rotation = quat.identity();
+        this._scale    = vec3.create(1, 1, 1);
+
         this.transformMatrix = mat4.identity();
+        this.normalMatrix = mat3.identity();
         this.direction = vec3.create(0, 0, -1);
     }
 
@@ -43,6 +49,7 @@ export class Transform extends Component {
     getAbsoluteScale() { return vec3.mul(this.parentAbsoluteScale, this.scale); };
     
     getMatrix() { return this.transformMatrix; }
+    getNormalMatrix() { return this.normalMatrix; }
     getDirection() { return this.direction; }
 
     updateAbsoluteValues() {
@@ -63,6 +70,7 @@ export class Transform extends Component {
     
     recalculate() {
         this.transformMatrix = this.recalculateTransformMatrix();
+        this.normalMatrix = this.recalculateNormalMatrix();
         this.direction = this.recalculateDirection();
     }
     
@@ -96,6 +104,20 @@ export class Transform extends Component {
 
         mat4.mul(result, mat4.fromQuat(this.getAbsoluteRotation()), result);
         mat4.scale(result, this.getAbsoluteScale(), result);
+
+        return result;
+    }
+
+    private recalculateNormalMatrix() {
+        let result = mat3.scaling(
+            vec3.create(
+                1 / this.getAbsoluteScale()[0],
+                1 / this.getAbsoluteScale()[1],
+                1 / this.getAbsoluteScale()[2],
+            ),
+        );
+
+        mat3.mul(result, mat3.fromQuat(this.getAbsoluteRotation()), result);
 
         return result;
     }
