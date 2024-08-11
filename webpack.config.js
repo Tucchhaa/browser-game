@@ -42,15 +42,7 @@ module.exports = {
         historyApiFallback: true,
         static: [
             {
-                directory: path.resolve(__dirname, 'playground'),
-                watch: true,
-            },
-            {
-                directory: path.resolve(__dirname, 'shaders'),
-                watch: true,
-            },
-            {
-                directory: path.resolve(__dirname, 'assets'),
+                directory: path.resolve(__dirname, 'static'),
                 watch: true,
             },
         ],

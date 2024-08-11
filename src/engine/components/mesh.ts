@@ -49,7 +49,6 @@ export class MeshComponent extends Component {
     readonly vertexBuffer: GPUBuffer;
     readonly vertexCount: number;
 
-
     constructor(vertexData: Float32Array, label = "") {
         super();
 

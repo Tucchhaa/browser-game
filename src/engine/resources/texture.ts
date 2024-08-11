@@ -4,7 +4,7 @@ export class Texture {
     static defaultTexture: Texture;
 
     static async setup() {
-        Texture.defaultTexture = await engine.loader.loadTexture("textures/default.png");
+        Texture.defaultTexture = await engine.loader.loadTexture("assets/textures/default.png");
     }
 
     filepath: string;

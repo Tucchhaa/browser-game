@@ -1,11 +1,9 @@
 import { engine } from "./engine";
 
 export class ShaderFactory {
-    device: GPUDevice;
     bindGroupLayouts: GPUBindGroupLayout[];
 
     constructor(bindGroupLayouts: GPUBindGroupLayout[]) {
-        this.device = engine.device;
         this.bindGroupLayouts = bindGroupLayouts;
     }
 
@@ -13,7 +11,7 @@ export class ShaderFactory {
         const instance = new GraphicsShader(filepath);
         const code = await engine.loader.loadTextFile(filepath);
 
-        await instance.init(this.device, this.bindGroupLayouts, code);
+        await instance.init(this.bindGroupLayouts, code);
 
         return instance;
     }
@@ -26,30 +24,41 @@ export class ShaderFactory {
 abstract class AbstractShader {
     static labelPrefix = "";
 
+    device: GPUDevice;
     filepath: string;
     pipeline: GPURenderPipeline;
 
+    protected label: string;
+    protected module: GPUShaderModule;
+
     protected constructor(filepath: string) {
+        this.device = engine.device;
         this.filepath = filepath;
     }
 
-    async init(device: GPUDevice, bindGroupLayouts: GPUBindGroupLayout[], code: string) {
-        const label = `${AbstractShader.labelPrefix}: ${this.filepath}`;
-        const module = device.createShaderModule({ label, code });
+    async init(bindGroupLayouts: GPUBindGroupLayout[], code: string) {
+        this.label = `${AbstractShader.labelPrefix}: ${this.filepath}`;
+        this.module = engine.device.createShaderModule({ label: this.label, code });
+    }
+}
 
-        // const sceneBindGroupLayout = device.createBindGroupLayout({
-        //     entries: [
-        //         { binding: 0, visibility: GPUShaderStage.VERTEX, buffer: {} }
-        //     ]
-        // });
+export class GraphicsShader extends AbstractShader {
+    static override labelPrefix = "Graphics shader"
 
-        const layout = device.createPipelineLayout({ bindGroupLayouts });
+    constructor(filepath: string) {
+        super(filepath);
+    }
 
-        this.pipeline = device.createRenderPipeline({
-            label,
+    override async init(bindGroupLayouts: GPUBindGroupLayout[], code: string): Promise<void> {
+        await super.init(bindGroupLayouts, code);
+
+        const layout = this.device.createPipelineLayout({ bindGroupLayouts });
+
+        this.pipeline = this.device.createRenderPipeline({
+            label: this.label,
             layout,
             vertex: {
-                module,
+                module: this.module,
                 buffers: [
                     {
                         arrayStride: (3 + 2 + 3) * 4, // pos + uv + normal
@@ -62,7 +71,7 @@ abstract class AbstractShader {
                 ]
             },
             fragment: {
-                module: module,
+                module: this.module,
                 targets: [{ format: engine.textureFormat }]
             },
             primitive: {
@@ -75,14 +84,6 @@ abstract class AbstractShader {
                 format: 'depth24plus',
             },
         });
-    }
-}
-
-export class GraphicsShader extends AbstractShader {
-    static override labelPrefix = "Graphics shader"
-
-    constructor(filepath: string) {
-        super(filepath);
     }
 }
 

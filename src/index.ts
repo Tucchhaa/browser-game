@@ -14,7 +14,7 @@ async function main() {
 
     await engine.init(device, canvas);
 
-    const car = await engine.loader.loadMesh("car/car.obj", "car/car.mtl");
+    const car = await engine.loader.loadMesh("assets/car/car.obj", "assets/car/car.mtl");
     // const car = await engine.loader.loadMesh("untitled.obj");
 
     engine.tree.addGameObject(car);

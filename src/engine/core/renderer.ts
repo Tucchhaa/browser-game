@@ -37,8 +37,6 @@ class SceneData {
     }
 }
 
-
-
 export class Renderer extends Entity {
     readonly device: GPUDevice;
     shader: GraphicsShader;
@@ -75,7 +73,7 @@ export class Renderer extends Entity {
     camera: CameraComponent;
 
     override async setup() {
-        this.shader = await engine.shaderFactory.createGraphicsShader("base.wgsl");
+        this.shader = await engine.shaderFactory.createGraphicsShader("shaders/base.wgsl");
 
         const cameraObject = engine.tree.spawnGameObject();
         const controller = new CharacterController();
@@ -151,6 +149,6 @@ export class Renderer extends Entity {
             size: [canvasTexture.width, canvasTexture.height],
             format: 'depth24plus',
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
-        })
+        });
     }
 }

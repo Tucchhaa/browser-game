@@ -18,8 +18,6 @@ export class Engine {
     shaderFactory: ShaderFactory;
     renderer: Renderer;
 
-    constructor() { }
-
     async init(device: GPUDevice, canvas: HTMLCanvasElement) {
         // FOR DEBUGGING
         (window as any)._$ = this;
