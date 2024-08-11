@@ -1,11 +1,10 @@
-import OBJFile from 'obj-file-parser';
-import MTLFile from 'mtl-file-parser'
-import { GameObject } from "./game-object";
-import { engine } from "./engine";
 import { Vec2, vec2, vec3, Vec3 } from "wgpu-matrix";
-import { Mesh } from "../components/mesh";
-import { Material } from "../resources/material";
-import { Texture } from "../resources/texture";
+import OBJFile from 'obj-file-parser';
+import MTLFile from 'mtl-file-parser';
+
+import { GameObject, engine } from ".";
+import { Mesh } from "../components";
+import { Texture, Material } from "../resources";
 
 export class Loader {
     constructor() { }

@@ -1,4 +1,4 @@
-import { engine } from "../core/engine";
+import { engine } from "../core";
 
 export class Texture {
     static defaultTexture: Texture;

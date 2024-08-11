@@ -1,5 +1,4 @@
-import { Component } from "../components/component";
-import { Transform } from "../components/transform";
+import { Transform, Component } from "../components";
 
 type ComponentType<T extends Component> = new (...args: any[]) => T;
 

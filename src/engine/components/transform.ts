@@ -1,5 +1,6 @@
 import { mat4, quat, Quat, Vec3, vec3 } from "wgpu-matrix";
-import { Component } from "./component";
+
+import { Component } from ".";
 
 export class Transform extends Component {
     position: Vec3 = vec3.zero();

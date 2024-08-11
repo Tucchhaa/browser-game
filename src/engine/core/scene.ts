@@ -1,9 +1,5 @@
-import { EngineEventListener } from "./engine-event-listener";
-import { Camera } from "../components/camera";
-import { Mesh } from "../components/mesh";
-import { DirectLight } from "../components/lights/direct-light";
-import { PointLight } from "../components/lights/point-light";
-import { engine } from "./engine";
+import { engine, EngineEventListener } from ".";
+import { Mesh, Camera, DirectLight, PointLight } from "../components";
 
 interface SceneComponents {
     meshes: Mesh[],

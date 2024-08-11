@@ -1,5 +1,6 @@
-import { Component } from "../component";
 import { vec3, Vec3 } from "wgpu-matrix";
+
+import { Component } from "..";
 
 export class DirectLight extends Component {
     public color: Vec3;

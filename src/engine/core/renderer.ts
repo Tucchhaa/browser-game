@@ -1,9 +1,6 @@
 import { MAT4x4_BYTE_LENGTH, VEC4_BYTE_LENGTH } from "../const";
-import { engine } from "./engine";
-import { EngineEventListener } from "./engine-event-listener";
-import { GraphicsShader } from "./shader";
-import { DirectLight } from "../components/lights/direct-light";
-import { PointLight } from "../components/lights/point-light";
+import { engine, GraphicsShader, EngineEventListener } from ".";
+import { PointLight, DirectLight } from "../components";
 
 export class Renderer extends EngineEventListener {
     readonly device: GPUDevice;

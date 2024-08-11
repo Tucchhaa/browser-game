@@ -1,5 +1,5 @@
 import { vec3, Vec3 } from "wgpu-matrix";
-import { Texture } from "./texture";
+import { Texture } from ".";
 
 interface MaterialConfig {
     name: string;

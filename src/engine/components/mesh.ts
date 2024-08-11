@@ -1,7 +1,6 @@
-import { Component } from "./component";
-import { GraphicsShader } from "../core/shader";
-import { engine } from "../core/engine";
-import { Material } from "../resources/material";
+import { Component } from ".";
+import { engine, GraphicsShader } from "../core";
+import { Material } from "../resources";
 import { MAT4x4_BYTE_LENGTH, VEC4_BYTE_LENGTH } from "../const";
 
 class MeshShaderData {

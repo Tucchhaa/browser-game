@@ -1,11 +1,5 @@
-import { EngineEventListener } from "./engine-event-listener";
-import { Input } from "./input";
-import { Loader } from "./loader";
-import { ShaderFactory } from "./shader";
-import { Renderer } from "./renderer";
-import { Tree } from "./tree";
-import { Texture } from "../resources/texture";
-import { Scene } from "./scene";
+import { EngineEventListener, Input, Loader, ShaderFactory, Renderer, Tree, Scene } from ".";
+import { Texture } from "../resources";
 
 export class Engine {
     device: GPUDevice;

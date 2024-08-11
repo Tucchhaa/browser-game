@@ -1,6 +1,7 @@
-import { Component } from "./component";
 import { Mat4, mat4, vec3 } from "wgpu-matrix";
-import { engine } from "../core/engine";
+
+import { Component } from ".";
+import { engine } from "../core";
 
 export class Camera extends Component {
     private far: number;

@@ -1,5 +1,4 @@
-import { EngineEventListener } from "../core/engine-event-listener";
-import { GameObject } from "../core/game-object";
+import { EngineEventListener, GameObject } from "../core";
 
 export class Component extends EngineEventListener {
     gameObject: GameObject;

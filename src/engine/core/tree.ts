@@ -1,5 +1,4 @@
-import { GameObject } from "./game-object";
-import { EngineEventListener } from "./engine-event-listener";
+import { EngineEventListener, GameObject } from ".";
 
 export class Tree extends EngineEventListener {
     root: Node;
