@@ -1,2 +1,5 @@
 .idea
 node_modules
+
+/src/server/cmake-build-debug
+/src/server/vcpkg
