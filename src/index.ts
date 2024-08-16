@@ -17,6 +17,8 @@ async function main() {
 
     await engine.init(device, canvas);
 
+    engine.scene = await engine.loader.loadScene("scene1");
+
     // create camera
     const cameraObject = engine.tree.spawnGameObject();
     cameraObject.transform.position = vec3.fromValues(0, 2, 5);
@@ -30,15 +32,15 @@ async function main() {
     engine.scene.mainCamera = camera;
 
     // create car
-    const car = await engine.loader.loadMesh("assets/car/car.obj", "assets/car/car.mtl");
-    car.transform.translate(vec3.create(0, 0.24, 0));
-    car.transform.rotate(quat.fromEuler(0, Math.PI, 0, 'yxz'));
-    engine.tree.addGameObject(car);
-
-    // create ground
-    const ground = await engine.loader.loadMesh("assets/plane.obj", "assets/plane.mtl");
-    ground.transform.scaleBy(vec3.create(10, 1, 10));
-    engine.tree.addGameObject(ground);
+    // const car = await engine.loader.loadMesh("assets/car/car.obj", "assets/car/car.mtl");
+    // car.transform.translate(vec3.create(0, 0.24, 0));
+    // car.transform.rotate(quat.fromEuler(0, Math.PI, 0, 'yxz'));
+    // engine.tree.addGameObject(car);
+    //
+    // // create ground
+    // const ground = await engine.loader.loadMesh("assets/plane.obj", "assets/plane.mtl");
+    // ground.transform.scaleBy(vec3.create(10, 1, 10));
+    // engine.tree.addGameObject(ground);
 
     // create direct light
     const directLightObject = engine.tree.spawnGameObject();

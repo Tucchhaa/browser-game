@@ -2,7 +2,7 @@ import { Vec2, vec2, vec3, Vec3 } from "wgpu-matrix";
 import OBJFile from 'obj-file-parser';
 import MTLFile from 'mtl-file-parser';
 
-import { GameObject, engine } from ".";
+import { GameObject, engine, Scene } from ".";
 import { Mesh } from "../components";
 import { Texture, Material } from "../resources";
 
@@ -32,6 +32,18 @@ export class Loader {
         const response = await this.load(filepath);
 
         return await response.text();
+    }
+
+    async loadScene(scene: string) {
+        const sceneObjects = await engine.network.requestSceneObjects(scene);
+
+        for(const sceneObject of sceneObjects) {
+            const gameObject = await this.loadMesh('assets/'+sceneObject.model, 'assets/'+sceneObject.material);
+
+            engine.tree.addGameObject(gameObject);
+        }
+
+        return new Scene();
     }
 
     private async loadOBJ(filepath: string, mtlFilepath?: string) {
@@ -81,6 +93,9 @@ class OBJParser {
     }
 
     parseMaterials(raw: string) {
+        const originalConsoleWarn = console.warn;
+        console.warn = () => {};
+
         const mtls = new MTLFile(raw).parse();
 
         for (let i=0; i < mtls.length; i++) {
@@ -96,6 +111,8 @@ class OBJParser {
                 ao: mtl.map_Ka.file
             }));
         }
+
+        console.warn = originalConsoleWarn;
     }
 
     parseModel(model: OBJFile.ObjModel): GameObject {

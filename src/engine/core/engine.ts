@@ -1,5 +1,6 @@
 import { EngineEventListener, Input, Loader, ShaderFactory, Renderer, Tree, Scene } from ".";
 import { Texture } from "../resources";
+import { Network } from "./network";
 
 export class Engine {
     device: GPUDevice;
@@ -7,6 +8,7 @@ export class Engine {
     ctx: GPUCanvasContext;
     textureFormat: GPUTextureFormat;
 
+    network: Network;
     scene: Scene;
     input: Input;
     tree: Tree;
@@ -23,7 +25,9 @@ export class Engine {
 
         this.initCanvas();
 
-        this.scene = new Scene();
+        this.network = new Network("ws://localhost:8081/ws");
+        await this.network.open();
+
         this.input = new Input();
         this.tree = new Tree();
         this.loader = new Loader();
@@ -50,12 +54,18 @@ export class Engine {
             that.canvas.width = window.innerWidth * 2;
             that.canvas.height = window.innerHeight * 2;
 
-            that.renderer.onResize();
+            that.renderer?.onResize();
         }
     }
 
     start() {
         // this.renderer.render();
+
+        if(this.scene === undefined) {
+            throw new Error("Scene is not defined");
+        }
+
+        this.network.start();
         this.renderLoop();
     }
 
