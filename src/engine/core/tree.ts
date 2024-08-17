@@ -13,7 +13,7 @@ export class Tree extends EngineEventListener {
         // assert: parent doesn't already have this child
 
         if(child.parent)
-            this.removeChild(parent, child);
+            this.removeChild(child.parent, child);
 
         parent.children.push(child);
         child.parent = parent;
@@ -44,12 +44,12 @@ export class Tree extends EngineEventListener {
         return gameObject;
     }
 
-    applyToAll(callback: (gameObject: GameObject) => void) {
+    traverse(callback: (gameObject: GameObject) => void) {
         this.traverseChildren(this.root, callback);
     }
 
     updateTransforms() {
-        this.applyToAll(gameObject => gameObject.transform.updateAbsoluteValues());
+        this.traverse(gameObject => gameObject.transform.updateAbsoluteValues());
     }
 
     private traverseChildren(gameObject: GameObject, callback: (gameObject: GameObject) => void) {

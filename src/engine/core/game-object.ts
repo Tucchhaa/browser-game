@@ -3,7 +3,9 @@ import { Transform, Component } from "../components";
 type ComponentType<T extends Component> = new (...args: any[]) => T;
 
 export class GameObject {
+    // Negative ID means that the object is on the client side
     ID: number;
+
     components: ComponentsManager;
     transform: Transform;
 
@@ -20,10 +22,12 @@ export class GameObject {
         this.components.add(this.transform);
     }
 
-    static count = 0;
+    get isServerSide() { return this.ID >= 0; }
+
+    static count = 1;
 
     static generateID() {
-        return GameObject.count++;
+        return -(GameObject.count++);
     }
 }
 

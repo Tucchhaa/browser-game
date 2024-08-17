@@ -10,10 +10,6 @@ export class EngineEventListener {
 
     async teardown() {}
 
-    prepareSendData(data: any) {}
-
-    receiveNetworkData(data: any) {}
-
     beforeRender() {}
 
     afterRender() {}
@@ -26,16 +22,6 @@ export class EngineEventListener {
     static async teardown() {
         for (const entity of EngineEventListener.entities)
             await entity.teardown();
-    }
-
-    static prepareNetworkData(data: any) {
-        for (const entity of EngineEventListener.entities)
-            entity.prepareSendData(data);
-    }
-
-    static receiveNetworkData(data: any) {
-        for(const entity of EngineEventListener.entities)
-            entity.receiveNetworkData(data);
     }
 
     static beforeRender() {

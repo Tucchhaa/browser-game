@@ -4,46 +4,7 @@
 
 #include "nlohmann/json.hpp"
 #include "crow.h"
-#include "physics_world.hpp"
-
-using json = nlohmann::json;
-
-// class User {
-// public:
-//     explicit User(crow::websocket::connection& connection) : connection(connection) {}
-//
-//     ~User() {
-//         connection.close();
-//     }
-//
-//     void send(const std::string& text) const {
-//         connection.send_text(text);
-//     }
-//
-// private:
-//     crow::websocket::connection& connection;
-// };
-
-class Scene {
-public:
-    std::vector<json> getObjectsList() {
-        json car;
-        car["name"] = "car";
-        car["model"] = "car/car.obj";
-        car["material"] = "car/car.mtl";
-
-        json ground;
-        ground["name"] = "ground";
-        ground["model"] = "plane.obj";
-        ground["material"] = "plane.mtl";
-
-        return { car, ground };
-    }
-
-private:
-    PhysicsWorld world;
-
-};
+#include "scene/scene.hpp"
 
 class Room {
     using user_t = crow::websocket::connection;
@@ -114,7 +75,7 @@ int main() {
     });
 
     CROW_ROUTE(app, "/json")([&]() {
-        json response;
+        nlohmann::json response;
         response["type"] = "requestSceneData";
         response["sceneName"] = "scene1";
         response["data"] = mainRoom->scene.getObjectsList();
@@ -136,13 +97,13 @@ int main() {
             mainRoom->removeUser(connection);
         })
         .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
-            json message = json::parse(data);
+            nlohmann::json message = nlohmann::json::parse(data);
             const std::string type = message["type"];
 
             CROW_LOG_INFO << "received message type: " << type;
 
             if (type == "requestSceneData") {
-                json response;
+                nlohmann::json response;
                 response["type"] = "requestSceneData";
                 response["sceneName"] = "scene1";
                 response["data"] = mainRoom->scene.getObjectsList();

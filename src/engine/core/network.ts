@@ -1,5 +1,19 @@
 import { EngineEventListener } from "./engine-event-listener";
 import { NETWORK_REQUESTS_PER_SECOND } from "../const";
+import { engine } from "./engine";
+
+export type ObjectSyncRequest = TransformRequest;
+
+interface TransformRequest {
+    type: "transform",
+    gameObjectID: number,
+}
+
+interface SyncRequest {
+    send_timestamp: number,
+    requests: TransformRequest[],
+    input: {}
+}
 
 interface SceneObject {
     name: string,
@@ -56,18 +70,18 @@ export class Network extends EngineEventListener {
     }
 
     start() {
-        // if(this.interval)
-        //     clearInterval(this.interval);
-        //
-        // this.interval = setInterval(() => {
-        //     if(!this.opened) {
-        //         clearInterval(this.interval);
-        //         return;
-        //     }
-        //
-        //     const data = this.prepareData();
-        //     this.socket.send(data);
-        // }, 1000 / NETWORK_REQUESTS_PER_SECOND);
+        if(this.interval)
+            clearInterval(this.interval);
+
+        this.interval = setInterval(() => {
+            if(!this.opened) {
+                clearInterval(this.interval);
+                return;
+            }
+
+            const request = this.prepareSyncRequest();
+            this.socket.send(JSON.stringify(request));
+        }, 1000 / NETWORK_REQUESTS_PER_SECOND);
     }
 
     async requestSceneObjects(sceneName: string): Promise<SceneObject[]> {
@@ -108,15 +122,19 @@ export class Network extends EngineEventListener {
         }
     }
 
-    private prepareData() {
-        // const data: SendData = {
-        //     send_timestamp: Date.now(),
-        //     transforms: []
-        // };
-        //
-        // EngineEventListener.prepareNetworkData(data);
-        //
-        // return JSON.stringify(data);
+    private prepareSyncRequest(): SyncRequest {
+        const requests: ObjectSyncRequest[] = [];
+
+        for(const component of engine.scene.getSyncComponents()) {
+            const request = component.createSyncRequest();
+            requests.push(...request);
+        }
+
+        return {
+            send_timestamp: Date.now(),
+            requests,
+            input: {}
+        };
     }
 
     private receiveData(data: Message) {
@@ -126,6 +144,15 @@ export class Network extends EngineEventListener {
 
 // ServerSync.syncTransform(true)
 /*
+
+{
+    requests: [
+        ['transform', gameObject_ID]
+    ],
+    input: {
+
+    }
+}
 
 Network.send - called when client got the message from the server
 Что мы будем отправлять:

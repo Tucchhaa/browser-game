@@ -8,3 +8,5 @@ export * from './lights/point-light'
 
 export * from './mesh'
 export * from './transform'
+
+export * from './sync'
