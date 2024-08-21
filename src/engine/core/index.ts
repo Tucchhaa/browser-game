@@ -4,6 +4,7 @@ export * from './game-object'
 
 export * from './input'
 export * from './loader'
+export * from './network'
 export * from './renderer'
 export * from './scene'
 export * from './shader'

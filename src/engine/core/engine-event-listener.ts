@@ -1,4 +1,3 @@
-
 export class EngineEventListener {
     private static entities: EngineEventListener[] = [];
 

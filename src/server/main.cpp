@@ -9,6 +9,8 @@
 class SimpleScene: public Scene {
 public:
     SimpleScene(): Scene() {
+        name = "simple scene";
+
         init();
     }
 
@@ -18,10 +20,15 @@ public:
         car->model = "car/car.obj";
         car->material = "car/car.mtl";
 
+        car->transform->translate(vec3(0, 0.25, 0));
+        car->transform->rotate(angleAxis(3.1415f, vec3(0, 1, 0)));
+
         auto ground = tree.spawnGameObject();
         ground->name = "ground";
         ground->model = "plane.obj";
         ground->material = "plane.mtl";
+
+        ground->transform->scaleBy(vec3(10, 1, 10));
     }
 };
 
@@ -37,26 +44,42 @@ public:
     }
 
     void addUser(user_t& user) {
-        std::lock_guard _(mtx);
+        lock_guard _(mtx);
         users.insert(&user);
     }
 
     void removeUser(user_t& user) {
-        std::lock_guard _(mtx);
+        lock_guard _(mtx);
         users.erase(&user);
     }
 
-    void send(const std::string& text) {
-        std::lock_guard _(mtx);
+    void send(const string& text) {
+        lock_guard _(mtx);
 
         for(auto* user : users) {
             user->send_text(text);
         }
     }
 
+    json getSceneData(json message) {
+        return {
+            { "type", message["type"] },
+            { "sceneName", scene.name },
+            { "data", scene.getObjectsList() }
+        };
+    }
+
+    json getSyncData(json message) {
+        return {
+            { "type", message["type"] },
+            { "send_timestamp", message["send_timestamp"] },
+            { "transform", scene.getTransformData() }
+        };
+    }
+
 private:
-    std::mutex mtx;
-    std::unordered_set<user_t*> users;
+    mutex mtx;
+    unordered_set<user_t*> users;
 
     static int generateID() {
         static int count = 0;
@@ -67,8 +90,8 @@ private:
 int main() {
     crow::SimpleApp app;
 
-    std::unordered_set<crow::websocket::connection*> users;
-    std::unordered_set<Room*> rooms;
+    unordered_set<crow::websocket::connection*> users;
+    unordered_set<Room*> rooms;
 
     const auto mainRoom = new Room();
 
@@ -95,24 +118,22 @@ int main() {
 
             connection.send_text(R"({ "info": "aboba" })");
         })
-        .onclose([&](crow::websocket::connection& connection, const std::string& reason) {
+        .onclose([&](crow::websocket::connection& connection, const string& reason) {
             CROW_LOG_INFO << "websocket connection closed: " << reason;
 
             mainRoom->removeUser(connection);
         })
-        .onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
-            nlohmann::json message = nlohmann::json::parse(data);
-            const std::string type = message["type"];
+        .onmessage([&](crow::websocket::connection& conn, const string& data, bool is_binary) {
+            json message = json::parse(data);
+            const string type = message["type"];
 
             CROW_LOG_INFO << "received message type: " << type;
 
-            if (type == "requestSceneData") {
-                nlohmann::json response;
-                response["type"] = "requestSceneData";
-                response["sceneName"] = "scene1";
-                response["data"] = mainRoom->scene.getObjectsList();
-
-                conn.send_text(response.dump());
+            if (type == "sceneData") {
+                conn.send_text(mainRoom->getSceneData(message).dump());
+            }
+            else if (type == "sync") {
+                conn.send_text(mainRoom->getSyncData(message).dump());
             }
             else {
                 conn.send_text(R"({ "info": "message" })");

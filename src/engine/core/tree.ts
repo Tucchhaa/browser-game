@@ -3,10 +3,17 @@ import { EngineEventListener, GameObject } from ".";
 export class Tree extends EngineEventListener {
     readonly root: GameObject;
 
+    private readonly id_gameObject: Map<number, GameObject>;
+
     constructor() {
         super();
 
         this.root = new GameObject();
+        this.id_gameObject = new Map();
+    }
+
+    getGameObjectByID(ID: number) {
+        return this.id_gameObject.get(ID);
     }
 
     addChild(parent: GameObject, child: GameObject) {
@@ -15,6 +22,7 @@ export class Tree extends EngineEventListener {
         if(child.parent)
             this.removeChild(child.parent, child);
 
+        this.id_gameObject.set(child.ID, child);
         parent.children.push(child);
         child.parent = parent;
     }
@@ -23,12 +31,14 @@ export class Tree extends EngineEventListener {
         // assert: index is always >= 0
         const index = parent.children.indexOf(child);
 
+        this.id_gameObject.delete(child.ID);
         parent.children.splice(index, 1);
 
         child.parent = null;
     }
 
     addGameObject(gameObject: GameObject) {
+        this.id_gameObject.set(gameObject.ID, gameObject);
         this.addChild(this.root, gameObject);
     }
 

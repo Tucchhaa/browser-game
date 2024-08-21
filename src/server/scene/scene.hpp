@@ -6,12 +6,19 @@
 #include "physics_world.hpp"
 #include "tree.hpp"
 
+using json = nlohmann::json;
+
 class Scene {
 public:
+    string name;
 
-    std::vector<nlohmann::json> getObjectsList();
+    vector<json> getObjectsList();
 
-    void tick();
+    json getTransformData();
+
+    Scene();
+
+    void tick(float dt);
 
 protected:
     Tree tree;

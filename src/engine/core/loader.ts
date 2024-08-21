@@ -3,7 +3,7 @@ import OBJFile from 'obj-file-parser';
 import MTLFile from 'mtl-file-parser';
 
 import { GameObject, engine, Scene } from ".";
-import { Mesh } from "../components";
+import { Mesh, Sync } from "../components";
 import { Texture, Material } from "../resources";
 
 export class Loader {
@@ -41,10 +41,15 @@ export class Loader {
             if(!sceneObject.model) {
                 continue;
             }
-            
+
             const filepath = `assets/${sceneObject.model}`;
             const mtlFilepath = `assets/${sceneObject.material}`;
+
             const gameObject = await this.loadMesh(filepath, mtlFilepath);
+            const syncComponent = new Sync();
+
+            gameObject.ID = sceneObject.ID;
+            gameObject.components.add(syncComponent);
 
             engine.tree.addGameObject(gameObject);
         }
