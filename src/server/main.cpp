@@ -6,6 +6,25 @@
 #include "crow.h"
 #include "scene/scene.hpp"
 
+class SimpleScene: public Scene {
+public:
+    SimpleScene(): Scene() {
+        init();
+    }
+
+    void init() {
+        auto car = tree.spawnGameObject();
+        car->name = "car";
+        car->model = "car/car.obj";
+        car->material = "car/car.mtl";
+
+        auto ground = tree.spawnGameObject();
+        ground->name = "ground";
+        ground->model = "plane.obj";
+        ground->material = "plane.mtl";
+    }
+};
+
 class Room {
     using user_t = crow::websocket::connection;
 public:
@@ -13,7 +32,9 @@ public:
 
     Scene scene;
 
-    Room(): ID(generateID()), scene(Scene()) {}
+    Room(): ID(generateID()), scene(Scene()) {
+        scene = SimpleScene();
+    }
 
     void addUser(user_t& user) {
         std::lock_guard _(mtx);
@@ -40,23 +61,6 @@ private:
     static int generateID() {
         static int count = 0;
         return count++;
-    }
-};
-
-class GameObject {
-public:
-    std::string name;
-    std::string model;
-    std::string material;
-
-    std::vector<GameObject*> children;
-    GameObject* parent;
-
-    GameObject() {
-        name = "";
-        model = "";
-        material = "";
-        parent = nullptr;
     }
 };
 

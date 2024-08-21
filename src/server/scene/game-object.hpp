@@ -1,6 +1,7 @@
 #pragma once
 
 #include <set>
+#include <string>
 
 #include "components/components-manager.hpp"
 #include "components/transform.hpp"
@@ -17,9 +18,12 @@ public:
 
     ComponentsManager components;
 
+    string name;
+    string model;
+    string material;
+
     GameObject();
     explicit GameObject(Transform& transform);
-
 
 private:
     static inline int lastID = 1;

@@ -3,15 +3,21 @@
 using json = nlohmann::json;
 
 std::vector<nlohmann::json> Scene::getObjectsList() {
-    json car;
-    car["name"] = "car";
-    car["model"] = "car/car.obj";
-    car["material"] = "car/car.mtl";
+    vector<json> list;
 
-    json ground;
-    ground["name"] = "ground";
-    ground["model"] = "plane.obj";
-    ground["material"] = "plane.mtl";
+    auto prepareObjectJSON = [&list](const shared_ptr<GameObject>& gameObject) {
+        json object;
+        object["name"] = gameObject->name;
+        object["model"] = gameObject->model;
+        object["material"] = gameObject->material;
 
-    return { car, ground };
+        list.push_back(object);
+    };
+
+    tree.traverse(prepareObjectJSON);
+
+    return list;
+}
+
+void Scene::tick() {
 }

@@ -38,7 +38,13 @@ export class Loader {
         const sceneObjects = await engine.network.requestSceneObjects(scene);
 
         for(const sceneObject of sceneObjects) {
-            const gameObject = await this.loadMesh('assets/'+sceneObject.model, 'assets/'+sceneObject.material);
+            if(!sceneObject.model) {
+                continue;
+            }
+            
+            const filepath = `assets/${sceneObject.model}`;
+            const mtlFilepath = `assets/${sceneObject.material}`;
+            const gameObject = await this.loadMesh(filepath, mtlFilepath);
 
             engine.tree.addGameObject(gameObject);
         }
