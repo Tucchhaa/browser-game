@@ -11,9 +11,9 @@ public:
 
     PhysicsWorld();
 
-    void addRigidBody(shared_ptr<btRigidBody>& rigidBody) const;
+    void addRigidBody(const shared_ptr<btRigidBody>& rigidBody) const;
 
-    void removeRigidBody(shared_ptr<btRigidBody>& rigidBody) const;
+    void removeRigidBody(const shared_ptr<btRigidBody>& rigidBody) const;
 
 private:
     unique_ptr<btDefaultCollisionConfiguration> collisionConfiguration;
@@ -24,7 +24,7 @@ private:
 
     unique_ptr<btSequentialImpulseConstraintSolver> solver;
 
-    btVector3 gravity = btVector3(0, -15, 0);
+    btVector3 gravity = btVector3(0, -10, 0);
 
     btAlignedObjectArray<shared_ptr<btCollisionShape>> collisionShapes;
 };

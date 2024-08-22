@@ -52,7 +52,7 @@ export class Network extends EngineEventListener {
             }
 
             this.sendSyncRequest();
-        }, 1000 / 2);
+        }, 1000 / 60);
     }
 
     async requestSceneObjects(sceneName: string): Promise<SceneObject[]> {
@@ -105,9 +105,9 @@ export class Network extends EngineEventListener {
             if(!gameObject)
                 continue;
 
-            const syncComponent = gameObject.components.getOptional(Sync);
+            const syncComponent = gameObject.components.get(Sync);
 
-            syncComponent?.syncTransform(transformData);
+            syncComponent.syncTransform(transformData);
         }
     }
 

@@ -10,6 +10,8 @@ using json = nlohmann::json;
 
 class Scene {
 public:
+    virtual ~Scene() = default;
+
     string name;
 
     vector<json> getObjectsList();
@@ -18,10 +20,10 @@ public:
 
     Scene();
 
-    void tick(float dt);
+    virtual void tick(float dt);
 
 protected:
     Tree tree;
 
-    PhysicsWorld world;
+    shared_ptr<PhysicsWorld> physicsWorld;
 };

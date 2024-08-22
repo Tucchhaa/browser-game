@@ -13,12 +13,11 @@ PhysicsWorld::PhysicsWorld() {
     dynamicsWorld->setGravity(gravity);
 }
 
-
-void PhysicsWorld::addRigidBody(shared_ptr<btRigidBody>& rigidBody) const {
+void PhysicsWorld::addRigidBody(const shared_ptr<btRigidBody>& rigidBody) const {
     dynamicsWorld->addRigidBody(rigidBody.get());
 }
 
-void PhysicsWorld::removeRigidBody(shared_ptr<btRigidBody>& rigidBody) const {
+void PhysicsWorld::removeRigidBody(const shared_ptr<btRigidBody>& rigidBody) const {
     dynamicsWorld->removeRigidBody(rigidBody.get());
 }
 

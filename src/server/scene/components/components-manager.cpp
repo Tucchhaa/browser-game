@@ -66,6 +66,8 @@ void ComponentsManager::add(const shared_ptr<ObjectComponent> &component) {
     components.push_back(component);
 
     component->gameObject = gameObject;
+
+    component->onGameObjectSet();
 }
 
 #define INSTANTIATE_COMPONENTS_MANAGER_FUNCTIONS(T) \

@@ -35,4 +35,6 @@ add_executable(browser_game_server
         scene/components/components-manager.cpp
         scene/components/transform.hpp
         scene/components/transform.cpp
+        scene/components/collider.hpp
+        scene/components/collider.cpp
 )

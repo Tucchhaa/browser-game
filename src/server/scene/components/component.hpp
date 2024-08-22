@@ -15,6 +15,8 @@ public:
     [[nodiscard]] int gameObjectID() const;
     [[nodiscard]] std::shared_ptr<Transform> transform() const;
 
+    virtual void onGameObjectSet() {}
+
 private:
     static inline int count = 1;
 

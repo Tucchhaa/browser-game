@@ -63,7 +63,7 @@ void Transform::translate(const vec3 &vector, const Transform* transform) {
 void Transform::rotate(const quat &rotation, const Transform* transform) {
     if(transform != nullptr && transform != this) {
         auto conjugate = [](const quat& q) {
-            return quat(q.w(), -q.x(), -q.y(), -q.z());
+            return quat(-q.x(), -q.y(), -q.z(), q.w());
         };
 
         const quat relativeRotation = (transform->rotation * rotation) * conjugate(transform->rotation);

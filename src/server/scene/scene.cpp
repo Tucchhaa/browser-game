@@ -2,6 +2,8 @@
 
 Scene::Scene() {
     name = "noname scene";
+
+    physicsWorld = make_shared<PhysicsWorld>();
 }
 
 vector<json> Scene::getObjectsList() {
@@ -55,5 +57,5 @@ json Scene::getTransformData() {
 }
 
 void Scene::tick(float dt) {
-    world.dynamicsWorld->stepSimulation(dt);
+    physicsWorld->dynamicsWorld->stepSimulation(dt);
 }

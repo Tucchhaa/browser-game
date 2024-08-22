@@ -5,6 +5,7 @@
 #include "nlohmann/json.hpp"
 #include "crow.h"
 #include "scene/scene.hpp"
+#include "scene/components/collider.hpp"
 
 class SimpleScene: public Scene {
 public:
@@ -15,21 +16,47 @@ public:
     }
 
     void init() {
+        // Create car
         auto car = tree.spawnGameObject();
         car->name = "car";
         car->model = "car/car.obj";
         car->material = "car/car.mtl";
 
-        car->transform->translate(vec3(0, 0.25, 0));
+        car->transform->translate(vec3(0, 100, 0));
         car->transform->rotate(quat(vec3(0, 1, 0), 3.1415f));
 
+        auto carShape = make_shared<btBoxShape>(vec3(1, 1, 1));
+        auto carCollider = make_shared<Collider>(physicsWorld, carShape);
+
+        car->components.add(carCollider);
+
+        // Create ground
         auto ground = tree.spawnGameObject();
         ground->name = "ground";
         ground->model = "plane.obj";
         ground->material = "plane.mtl";
 
         ground->transform->scaleBy(vec3(10, 1, 10));
+
+        auto groundShape = make_shared<btBoxShape>(vec3(10, 1, 10));
+        auto groundCollider = make_shared<Collider>(physicsWorld, groundShape);
+        groundCollider->setMass(0.f);
+
+        ground->components.add(groundCollider);
+
+        colliders = { carCollider, groundCollider };
     }
+
+    void tick(float dt) override {
+        Scene::tick(dt);
+
+        for(const auto& collider: colliders) {
+            collider->updateTransformFromCollider();
+        }
+    }
+
+private:
+    vector<shared_ptr<Collider>> colliders;
 };
 
 class Room {
@@ -37,10 +64,11 @@ class Room {
 public:
     int ID;
 
-    Scene scene;
+    shared_ptr<Scene> scene;
 
-    Room(): ID(generateID()), scene(Scene()) {
-        scene = SimpleScene();
+    Room() {
+        ID = generateID();
+        scene = make_shared<SimpleScene>();
     }
 
     void addUser(user_t& user) {
@@ -61,25 +89,41 @@ public:
         }
     }
 
-    json getSceneData(json message) {
+    json getSceneData(json message) const {
         return {
             { "type", message["type"] },
-            { "sceneName", scene.name },
-            { "data", scene.getObjectsList() }
+            { "sceneName", scene->name },
+            { "data", scene->getObjectsList() }
         };
     }
 
-    json getSyncData(json message) {
+    json getSyncData(json message) const {
         return {
             { "type", message["type"] },
             { "send_timestamp", message["send_timestamp"] },
-            { "transform", scene.getTransformData() }
+            { "transform", scene->getTransformData() }
         };
+    }
+
+    void start() const {
+        auto scene = this->scene;
+
+        thread([scene]() {
+            constexpr unsigned int ms = 16;
+
+            while(true) {
+                scene->tick(ms/1000.);
+
+                this_thread::sleep_for(chrono::milliseconds(ms));
+            }
+        }).detach();
     }
 
 private:
     mutex mtx;
     unordered_set<user_t*> users;
+
+    thread sceneThread;
 
     static int generateID() {
         static int count = 0;
@@ -105,7 +149,7 @@ int main() {
         nlohmann::json response;
         response["type"] = "requestSceneData";
         response["sceneName"] = "scene1";
-        response["data"] = mainRoom->scene.getObjectsList();
+        response["data"] = mainRoom->scene->getObjectsList();
 
         return response.dump();
     });
@@ -135,6 +179,7 @@ int main() {
             }
         });
 
+    mainRoom->start();
     app.port(8081).multithreaded().run();
 
     return 0;
