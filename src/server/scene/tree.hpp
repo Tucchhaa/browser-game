@@ -9,6 +9,8 @@ using namespace std;
 
 class Tree {
 public:
+    shared_ptr<GameObject> root;
+
     Tree();
 
     shared_ptr<GameObject> getGameObjectByID(int ID);
@@ -40,7 +42,6 @@ public:
     static void updateTransforms(shared_ptr<GameObject>& gameObject);
 
 private:
-    shared_ptr<GameObject> root;
 
     map<int, shared_ptr<GameObject>> id_gameObject;
 };

@@ -2,9 +2,10 @@ import { Vec2, vec2, vec3, Vec3 } from "wgpu-matrix";
 import OBJFile from 'obj-file-parser';
 import MTLFile from 'mtl-file-parser';
 
-import { GameObject, engine, Scene } from ".";
+import { GameObject, engine, Scene, Tree } from ".";
 import { Mesh, Sync } from "../components";
 import { Texture, Material } from "../resources";
+import { SceneObject } from "./network.types";
 
 export class Loader {
     constructor() { }
@@ -35,24 +36,34 @@ export class Loader {
     }
 
     async loadScene(scene: string) {
-        const sceneObjects = await engine.network.requestSceneObjects(scene);
+        const sceneRoot = await engine.network.requestSceneRoot(scene);
 
-        for(const sceneObject of sceneObjects) {
-            if(!sceneObject.model) {
-                continue;
+        const handleSceneObject = async (parent: GameObject, sceneObject: SceneObject) => {
+            let gameObject: GameObject;
+
+            if(sceneObject.model) {
+                const filepath = `assets/${sceneObject.model}`;
+                const mtlFilepath = `assets/${sceneObject.material}`;
+
+                gameObject = await this.loadMesh(filepath, mtlFilepath);
+            }
+            else {
+                gameObject = Tree.createGameObject();
             }
 
-            const filepath = `assets/${sceneObject.model}`;
-            const mtlFilepath = `assets/${sceneObject.material}`;
-
-            const gameObject = await this.loadMesh(filepath, mtlFilepath);
             const syncComponent = new Sync();
 
             gameObject.ID = sceneObject.ID;
             gameObject.components.add(syncComponent);
 
-            engine.tree.addGameObject(gameObject);
+            engine.tree.addChild(parent, gameObject);
+
+            for(const child of sceneObject.objects) {
+                await handleSceneObject(gameObject, child);
+            }
         }
+
+        await handleSceneObject(engine.tree.root, sceneRoot);
 
         return new Scene();
     }
@@ -84,7 +95,7 @@ class OBJParser {
     parse(raw: string, mtlRaw?: string): GameObject {
         const obj = new OBJFile(raw).parse();
 
-        const gameObject = engine.tree.createGameObject();
+        const gameObject = Tree.createGameObject();
 
         if(mtlRaw) {
             this.parseMaterials(mtlRaw);
@@ -127,7 +138,7 @@ class OBJParser {
     }
 
     parseModel(model: OBJFile.ObjModel): GameObject {
-        const gameObject = engine.tree.createGameObject();
+        const gameObject = Tree.createGameObject();
         let vertexData = [];
         let currentMaterialName = model.faces[0].material;
 

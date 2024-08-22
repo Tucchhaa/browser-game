@@ -55,7 +55,7 @@ export class Network extends EngineEventListener {
         }, 1000 / 60);
     }
 
-    async requestSceneObjects(sceneName: string): Promise<SceneObject[]> {
+    async requestSceneRoot(sceneName: string): Promise<SceneObject> {
         this.socket.send(
             JSON.stringify({
                 type: "sceneData",
@@ -78,7 +78,7 @@ export class Network extends EngineEventListener {
 
             switch (message.type) {
                 case "sceneData":
-                    that.requestScenePromiseResolve?.call(this, message.data);
+                    that.requestScenePromiseResolve?.call(this, message.root);
                     break;
                 case "sync":
                     that.sync(message);

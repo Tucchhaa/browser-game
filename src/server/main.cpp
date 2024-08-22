@@ -93,7 +93,7 @@ public:
         return {
             { "type", message["type"] },
             { "sceneName", scene->name },
-            { "data", scene->getObjectsList() }
+            { "root", scene->getSceneRootJSON() }
         };
     }
 
@@ -149,7 +149,7 @@ int main() {
         nlohmann::json response;
         response["type"] = "requestSceneData";
         response["sceneName"] = "scene1";
-        response["data"] = mainRoom->scene->getObjectsList();
+        response["data"] = mainRoom->scene->getSceneRootJSON();
 
         return response.dump();
     });

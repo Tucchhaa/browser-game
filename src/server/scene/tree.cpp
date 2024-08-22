@@ -3,7 +3,8 @@
 #include <queue>
 
 Tree::Tree() {
-    this->root = make_shared<GameObject>();
+    root = make_shared<GameObject>();
+    root->name = "server-root";
 }
 
 shared_ptr<GameObject> Tree::getGameObjectByID(const int ID) {

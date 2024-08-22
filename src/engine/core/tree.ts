@@ -42,12 +42,12 @@ export class Tree extends EngineEventListener {
         this.addChild(this.root, gameObject);
     }
 
-    createGameObject() {
+    static createGameObject() {
         return new GameObject();
     }
 
     spawnGameObject() {
-        const gameObject = this.createGameObject();
+        const gameObject = Tree.createGameObject();
 
         this.addGameObject(gameObject);
 
@@ -55,14 +55,14 @@ export class Tree extends EngineEventListener {
     }
 
     traverse(callback: (gameObject: GameObject) => void) {
-        this.traverseChildren(this.root, callback);
+        Tree.traverseChildren(this.root, callback);
     }
 
     updateTransforms() {
         this.traverse(gameObject => gameObject.transform.updateAbsoluteValues());
     }
 
-    private traverseChildren(gameObject: GameObject, callback: (gameObject: GameObject) => void) {
+    static traverseChildren(gameObject: GameObject, callback: (gameObject: GameObject) => void) {
         const q = [gameObject];
 
         while(q.length) {

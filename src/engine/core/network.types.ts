@@ -17,7 +17,7 @@ export interface SceneDataRequest {
 export interface SceneDataResponse {
     type: "sceneData",
     sceneName: string,
-    data: SceneObject[]
+    root: SceneObject
 }
 
 // ===

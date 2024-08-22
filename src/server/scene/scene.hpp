@@ -14,7 +14,7 @@ public:
 
     string name;
 
-    vector<json> getObjectsList();
+    json getSceneRootJSON(const shared_ptr<GameObject>& gameObject = nullptr) const;
 
     json getTransformData();
 

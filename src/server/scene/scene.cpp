@@ -6,22 +6,22 @@ Scene::Scene() {
     physicsWorld = make_shared<PhysicsWorld>();
 }
 
-vector<json> Scene::getObjectsList() {
-    vector<json> list;
+json Scene::getSceneRootJSON(const shared_ptr<GameObject>& gameObject) const {
+    auto current = gameObject == nullptr ? tree.root : gameObject;
 
-    // TODO: implement nested objects
-    auto prepareObjectJSON = [&list](const shared_ptr<GameObject>& gameObject) {
-        list.push_back({
-            { "ID", gameObject->ID },
-            { "name", gameObject->name },
-            { "model", gameObject->model },
-            { "material", gameObject->material }
-        });
+    vector<json> objects;
+
+    for(const auto& child: current->children) {
+        objects.push_back(getSceneRootJSON(child));
+    }
+
+    return {
+        { "ID", current->ID },
+        { "name", current->name },
+        { "model", current->model },
+        { "material", current->material },
+        { "objects",  objects }
     };
-
-    tree.traverse(prepareObjectJSON);
-
-    return list;
 }
 
 json Scene::getTransformData() {
