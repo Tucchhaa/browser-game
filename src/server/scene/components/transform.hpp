@@ -1,13 +1,16 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include <LinearMath/btMatrix3x3.h>
+#include <LinearMath/btQuaternion.h>
+#include <LinearMath/btVector3.h>
 
 #include "component.hpp"
 
-using namespace glm;
 using namespace std;
+
+using vec3 = btVector3;
+using quat = btQuaternion;
+using mat3 = btMatrix3x3;
 
 class Transform : public ObjectComponent {
 public:
@@ -18,7 +21,7 @@ private:
 
     vec3 parentAbsoluteScale = vec3(1, 1, 1);
 
-    quat parentAbsoluteRotation = quat(vec3(0, 0, 0));
+    quat parentAbsoluteRotation = quat(0, 0, 0);
 
     // ===
 
@@ -28,60 +31,41 @@ private:
 
     quat rotation;
 
-    // ===
-
-    mat4 transformMatrix = mat4(1.0f);
-
-    mat3 normalMatrix = mat3(1.0f);
-
-    vec3 direction = vec3(0, 0, 1);
-
 public:
-    explicit Transform(vec3 position = vec3(0, 0, 0), quat rotation = quat(vec3(0, 0, 0)), vec3 scale = vec3(1, 1, 1));
+    explicit Transform(
+        const vec3& position = vec3(0, 0, 0),
+        const quat &rotation = quat(0, 0, 0),
+        const vec3 &scale = vec3(1, 1, 1)
+    );
 
     void print() const;
 
-    void setValues(vec3 position = vec3(0, 0, 0), quat rotation = quat(vec3(0, 0, 0)), vec3 scale = vec3(1, 1, 1));
-
     void setPosition(float x, float y, float z);
-    void setPosition(vec3 position);
+    void setPosition(const vec3 &position);
 
-    void setRotation(float w, float x, float y, float z);
-    void setRotation(quat rotation);
+    void setRotation(float x, float y, float z, float w);
+    void setRotation(const quat &rotation);
 
     void setScale(float s);
     void setScale(float x, float y, float z);
-    void setScale(vec3 scale);
+    void setScale(const vec3 &scale);
 
-    void translate(vec3 vector, const Transform* transform = nullptr);
+    void translate(const vec3 &vector, const Transform* transform = nullptr);
 
-    void rotate(quat rotation, const Transform* transform = nullptr);
+    void rotate(const quat &rotation, const Transform* transform = nullptr);
 
     void scaleBy(float s);
     void scaleBy(float x, float y, float z);
-    void scaleBy(vec3 scale);
+    void scaleBy(const vec3 &scale);
 
 // ===
 // Computations
 // ===
     void updateAbsoluteValues(shared_ptr<Transform>& parentTransform);
 
-    void recalculate();
-
-    mat4 calculateTransformMatrix() const;
-
-    mat3 calculateNormalMatrix() const;
-
-    vec3 calculateDirection() const;
-
 // ===
 // Getters
 // ===
-    mat4 getTransformMatrix() const;
-    
-    mat3 getNormalMatrix() const;
-    
-    vec3 getDirectionVector() const;
 
     vec3 getPosition() const;
 

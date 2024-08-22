@@ -31,20 +31,20 @@ json Scene::getTransformData() {
         list.push_back({
             {"gameObjectID", gameObject->ID },
             {"position", {
-                transform->getPosition().x,
-                transform->getPosition().y,
-                transform->getPosition().z
+                transform->getPosition().x(),
+                transform->getPosition().y(),
+                transform->getPosition().z()
             }},
             {"rotation", {
-                transform->getRotation().x,
-                transform->getRotation().y,
-                transform->getRotation().z,
-                transform->getRotation().w,
+                transform->getRotation().x(),
+                transform->getRotation().y(),
+                transform->getRotation().z(),
+                transform->getRotation().w(),
             }},
             {"scale", {
-                transform->getScale().x,
-                transform->getScale().y,
-                transform->getScale().z
+                transform->getScale().x(),
+                transform->getScale().y(),
+                transform->getScale().z()
             }}
         });
     };

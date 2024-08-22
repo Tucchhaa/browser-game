@@ -5,9 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(./vcpkg/installed/arm64-osx/include)
 
-find_package(glm CONFIG REQUIRED)
-link_libraries(glm::glm)
-
 find_package(Crow CONFIG REQUIRED)
 link_libraries(${CROW_LIBRARIES})
 

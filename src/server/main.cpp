@@ -21,7 +21,7 @@ public:
         car->material = "car/car.mtl";
 
         car->transform->translate(vec3(0, 0.25, 0));
-        car->transform->rotate(angleAxis(3.1415f, vec3(0, 1, 0)));
+        car->transform->rotate(quat(vec3(0, 1, 0), 3.1415f));
 
         auto ground = tree.spawnGameObject();
         ground->name = "ground";
@@ -127,16 +127,11 @@ int main() {
             json message = json::parse(data);
             const string type = message["type"];
 
-            CROW_LOG_INFO << "received message type: " << type;
-
             if (type == "sceneData") {
                 conn.send_text(mainRoom->getSceneData(message).dump());
             }
             else if (type == "sync") {
                 conn.send_text(mainRoom->getSyncData(message).dump());
-            }
-            else {
-                conn.send_text(R"({ "info": "message" })");
             }
         });
 
