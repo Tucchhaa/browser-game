@@ -3,80 +3,89 @@
 
 Collider::Collider(
     const shared_ptr<PhysicsWorld> &physicsWorld,
-    const shared_ptr<btCollisionShape> &shape
-): physicsWorld(physicsWorld), shape(shape) {
-    rigidBody = createRigidBody();
+    const vector<shared_ptr<Shape>> &shapes
+): m_shapes(shapes), m_physicsWorld(physicsWorld)
+{
+    m_shape = make_shared<btCompoundShape>();
+
+    for(const auto& shape: shapes) {
+        m_shape->addChildShape(*shape->btTransformPtr(), shape->btShapePtr());
+    }
+
+    m_rigidBody = createRigidBody();
+
+    for(const auto& shape: shapes) {
+        shape->setRigidBody(m_rigidBody);
+    }
 }
 
 Collider::~Collider() {
-    if(rigidBody->getMotionState())
-        delete rigidBody->getMotionState();
+    if(m_rigidBody->getMotionState())
+        delete m_rigidBody->getMotionState();
 
-    physicsWorld->removeRigidBody(rigidBody);
+    m_physicsWorld->removeRigidBody(m_rigidBody);
+}
+
+shared_ptr<btBoxShape> Collider::createBoxShape(const vec3& scale) {
+    auto box = make_shared<btBoxShape>(vec3(1, 1,1));
+
+    box->setLocalScaling(scale);
+
+    return box;
 }
 
 void Collider::onGameObjectSet() {
     ObjectComponent::onGameObjectSet();
 
-    updateColliderTransform();
+    resetRigidbodyTransform();
 }
 
 void Collider::setMass(float mass) {
-    this->mass = mass;
+    this->m_mass = mass;
 
-    physicsWorld->removeRigidBody(rigidBody);
+    m_physicsWorld->removeRigidBody(m_rigidBody);
 
     btVector3 inertia;
-    rigidBody->getCollisionShape()->calculateLocalInertia( mass, inertia );
-    rigidBody->setMassProps(btScalar(mass), inertia);
+    m_rigidBody->getCollisionShape()->calculateLocalInertia( mass, inertia );
+    m_rigidBody->setMassProps(btScalar(mass), inertia);
 
-    physicsWorld->addRigidBody(rigidBody);
+    m_physicsWorld->addRigidBody(m_rigidBody);
 }
 
 bool Collider::isDynamic() const {
-    return mass != 0.f;
-}
-
-shared_ptr<btRigidBody> Collider::getRigidBody() const {
-    return rigidBody;
+    return m_mass != 0.f;
 }
 
 shared_ptr<btRigidBody> Collider::createRigidBody() const {
     btVector3 localInertia(0, 0, 0);
     if (isDynamic())
-        shape->calculateLocalInertia(mass, localInertia);
+        m_shape->calculateLocalInertia(m_mass, localInertia);
 
     auto* motionState = new btDefaultMotionState(btTransform::getIdentity());
-    const auto info = btRigidBody::btRigidBodyConstructionInfo(mass, motionState, shape.get(), localInertia);
+    const auto info = btRigidBody::btRigidBodyConstructionInfo(m_mass, motionState, m_shape.get(), localInertia);
     auto rigidBody = make_shared<btRigidBody>(info);
 
-    physicsWorld->addRigidBody(rigidBody);
+    m_physicsWorld->addRigidBody(rigidBody);
 
     return rigidBody;
 }
 
-btTransform Collider::getColliderTransform() const {
-    btTransform colliderTransform;
+void Collider::resetRigidbodyTransform() const {
+    btTransform rigidbodyTransform;
 
-    colliderTransform.setOrigin(transform()->getPosition());
-    colliderTransform.setRotation(transform()->getRotation());
+    rigidbodyTransform.setOrigin(transform()->getPosition());
+    rigidbodyTransform.setRotation(transform()->getRotation());
 
-    return colliderTransform;
-}
-
-void Collider::updateColliderTransform() const {
-    const btTransform colliderTransform = getColliderTransform();
-
-    rigidBody->setWorldTransform(colliderTransform);
+    m_rigidBody->setWorldTransform(rigidbodyTransform);
 }
 
 void Collider::updateTransformFromCollider() const {
     btTransform colliderTransform;
 
-    if (rigidBody && rigidBody->getMotionState())
-        rigidBody->getMotionState()->getWorldTransform(colliderTransform);
+    if (m_rigidBody && m_rigidBody->getMotionState())
+        m_rigidBody->getMotionState()->getWorldTransform(colliderTransform);
     else
-        colliderTransform = rigidBody->getWorldTransform();
+        colliderTransform = m_rigidBody->getWorldTransform();
 
     const btVector3 position = colliderTransform.getOrigin();
     const btQuaternion rotation = colliderTransform.getRotation();

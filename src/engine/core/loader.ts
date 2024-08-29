@@ -3,9 +3,9 @@ import OBJFile from 'obj-file-parser';
 import MTLFile from 'mtl-file-parser';
 
 import { GameObject, engine, Scene, Tree } from ".";
-import { Mesh, Sync } from "../components";
+import { Mesh, Sync, Collider } from "../components";
 import { Texture, Material } from "../resources";
-import { SceneObject } from "./network.types";
+import { ShapeType, SceneObject } from "./network.types";
 
 export class Loader {
     constructor() { }
@@ -41,9 +41,11 @@ export class Loader {
         const handleSceneObject = async (parent: GameObject, sceneObject: SceneObject) => {
             let gameObject: GameObject;
 
-            if(sceneObject.model) {
-                const filepath = `assets/${sceneObject.model}`;
-                const mtlFilepath = `assets/${sceneObject.material}`;
+            const { shapes, model, material } = sceneObject;
+
+            if(model) {
+                const filepath = `assets/${model}`;
+                const mtlFilepath = `assets/${material}`;
 
                 gameObject = await this.loadMesh(filepath, mtlFilepath);
             }
@@ -52,9 +54,11 @@ export class Loader {
             }
 
             const syncComponent = new Sync();
+            const colliderComponent = await Collider.create(shapes);
 
             gameObject.ID = sceneObject.ID;
             gameObject.components.add(syncComponent);
+            gameObject.components.add(colliderComponent);
 
             engine.tree.addChild(parent, gameObject);
 
@@ -68,11 +72,26 @@ export class Loader {
         return new Scene();
     }
 
+    async loadShapeMesh(type: ShapeType) {
+        const filenames = {
+            "Box": "cube.obj",
+            "sphere": "not def"
+        };
+
+        const raw = await this.loadTextFile(`assets/${filenames[type]}`);
+        const colliderObject = new OBJParser(raw, undefined).parse();
+        const collider = colliderObject.children[0].components.get(Mesh);
+
+        collider.gameObject.components.remove(collider);
+
+        return collider;
+    }
+
     private async loadOBJ(filepath: string, mtlFilepath?: string) {
         const raw = await this.loadTextFile(filepath);
         const mtlRaw = mtlFilepath ? await this.loadTextFile(mtlFilepath) : undefined;
 
-        return new OBJParser().parse(raw, mtlRaw);
+        return new OBJParser(raw, mtlRaw).parse();
     }
 
     private async load(filepath: string) {
@@ -86,19 +105,27 @@ export class Loader {
 }
 
 class OBJParser {
+    raw: string;
+    mtlRaw?: string;
+
     vertexOffset = 0;
     textureOffset = 0;
     normalOffset = 0;
 
     materials: Map<string, Material> = new Map();
 
-    parse(raw: string, mtlRaw?: string): GameObject {
-        const obj = new OBJFile(raw).parse();
+    constructor(raw: string, mtlRaw?: string) {
+        this.raw = raw;
+        this.mtlRaw = mtlRaw;
+    }
+
+    parse(): GameObject {
+        const obj = new OBJFile(this.raw).parse();
 
         const gameObject = Tree.createGameObject();
 
-        if(mtlRaw) {
-            this.parseMaterials(mtlRaw);
+        if(this.mtlRaw) {
+            this.parseMaterials(this.mtlRaw);
         }
 
         for(const model of obj.models) {

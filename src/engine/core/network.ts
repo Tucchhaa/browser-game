@@ -78,11 +78,9 @@ export class Network extends EngineEventListener {
 
             switch (message.type) {
                 case "sceneData":
-                    that.requestScenePromiseResolve?.call(this, message.root);
-                    break;
+                    return that.requestScenePromiseResolve?.call(this, message.root);
                 case "sync":
-                    that.sync(message);
-                    break;
+                    return that.sync(message);  // TODO: check send_time
                 default:
                     console.warn(`Unknown message type: ${(message as any).type}`);
             }
@@ -98,20 +96,16 @@ export class Network extends EngineEventListener {
     }
 
     private sync(message: SyncResponse) {
-        debugger;
-        for(const transformData of message.transform) {
-            const gameObject = engine.tree.getGameObjectByID(transformData.gameObjectID);
+        for(const transform of message.transform) {
+            const gameObject = engine.tree.getGameObjectByID(transform.gameObjectID);
 
             if(!gameObject)
                 continue;
 
-            const syncComponent = gameObject.components.get(Sync);
+            const syncComponent = gameObject.components.get(Sync); // TODO: use caching
 
-            syncComponent.syncTransform(transformData);
+            syncComponent.syncTransform(transform);
+            syncComponent.syncColliders(transform.shapeTransforms);
         }
-    }
-
-    private receiveData(data: ResponseMessage) {
-        // EngineEventListener.receiveNetworkData(data);
     }
 }

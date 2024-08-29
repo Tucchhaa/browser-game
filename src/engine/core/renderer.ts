@@ -5,6 +5,7 @@ import { PointLight, DirectLight } from "../components";
 export class Renderer extends EngineEventListener {
     readonly device: GPUDevice;
     shader: GraphicsShader;
+    colliderShader: GraphicsShader;
 
     readonly sceneBindGroupLayout: GPUBindGroupLayout;
     readonly meshBindGroupLayout: GPUBindGroupLayout;
@@ -42,11 +43,23 @@ export class Renderer extends EngineEventListener {
 
     override async setup() {
         this.shader = await engine.shaderFactory.createGraphicsShader("shaders/base.wgsl");
+
+        this.colliderShader = await engine.shaderFactory.createGraphicsShader("shaders/collider.wgsl", {
+            primitive: {
+                topology: 'line-strip',
+                cullMode: "none"
+            },
+            // depthStencil: {
+            //     depthWriteEnabled: false,
+            //     depthCompare: 'always',
+            //     format: 'depth24plus',
+            // }
+        });
     }
 
     render() {
         const {
-            meshes, directLights, pointLights
+            meshes, directLights, pointLights, colliders
         } = engine.scene.getSceneComponents();
 
         this.sceneShaderData.write(directLights, pointLights);
@@ -70,6 +83,7 @@ export class Renderer extends EngineEventListener {
         const encoder = this.device.createCommandEncoder();
         const pass = encoder.beginRenderPass(renderPassDescriptor);
 
+        // Render meshes
         pass.setPipeline(this.shader.pipeline);
         pass.setBindGroup(0, this.sceneShaderData.bindGroup);
 
@@ -80,6 +94,21 @@ export class Renderer extends EngineEventListener {
             pass.setVertexBuffer(0, mesh.vertexBuffer);
 
             pass.draw(mesh.vertexCount);
+        }
+
+        // Render colliders
+        pass.setPipeline(this.colliderShader.pipeline);
+        pass.setBindGroup(0, this.sceneShaderData.bindGroup);
+
+        for(const collider of colliders) {
+            for(const [, { mesh }] of collider.meshes.entries()) {
+                mesh.shaderData.write();
+
+                pass.setBindGroup(1, mesh.shaderData.bindGroup)
+                pass.setVertexBuffer(0, mesh.vertexBuffer);
+
+                pass.draw(mesh.vertexCount);
+            }
         }
 
         pass.end();

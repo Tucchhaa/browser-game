@@ -24,16 +24,16 @@ export class GameObject {
 
     get isServerSide() { return this.ID >= 0; }
 
-    static count = 1;
+    static count = 0;
 
     static generateID() {
-        return -(GameObject.count++);
+        return -(++GameObject.count);
     }
 }
 
 class ComponentsManager {
     private readonly _gameObject: GameObject;
-    private _components: Component[];
+    private readonly _components: Component[];
 
     constructor(gameObject: GameObject) {
         this._gameObject = gameObject;
@@ -43,6 +43,14 @@ class ComponentsManager {
     add(component: Component) {
         this._components.push(component);
         component.attachTo(this._gameObject);
+    }
+
+    remove(component: Component) {
+        for(let i=0; i < this._components.length; i++) {
+            if(component == this._components[i]) {
+                this._components.splice(i, 1);
+            }
+        }
     }
 
     get<T extends Component>(type: ComponentType<T>): T {

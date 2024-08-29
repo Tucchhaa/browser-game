@@ -1,4 +1,6 @@
 #include "components-manager.hpp"
+
+#include "collider.hpp"
 #include "transform.hpp"
 
 #include "../game-object.hpp"
@@ -77,4 +79,5 @@ template vector<shared_ptr<T>> ComponentsManager::getAll<T>(); \
 template vector<shared_ptr<T>> ComponentsManager::getAllFromChildren<T>();
 
 INSTANTIATE_COMPONENTS_MANAGER_FUNCTIONS(Transform);
+INSTANTIATE_COMPONENTS_MANAGER_FUNCTIONS(Collider);
 

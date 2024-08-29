@@ -57,7 +57,7 @@ void Transform::setScale(const vec3 &scale) {
 void Transform::translate(const vec3 &vector, const Transform* transform) {
     // vector.setZ(-vector.z());
 
-    position += vector.rotate(rotation.getAxis(), rotation.getAngle());;
+    position += vector.rotate(rotation.getAxis(), rotation.getAngle());
 }
 
 void Transform::rotate(const quat &rotation, const Transform* transform) {

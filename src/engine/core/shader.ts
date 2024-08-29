@@ -7,11 +7,11 @@ export class ShaderFactory {
         this.bindGroupLayouts = bindGroupLayouts;
     }
 
-    async createGraphicsShader(filepath: string): Promise<GraphicsShader> {
+    async createGraphicsShader(filepath: string, options?: Partial<GPURenderPipelineDescriptor>): Promise<GraphicsShader> {
         const instance = new GraphicsShader(filepath);
         const code = await engine.loader.loadTextFile(filepath);
 
-        await instance.init(this.bindGroupLayouts, code);
+        await instance.init(this.bindGroupLayouts, code, options);
 
         return instance;
     }
@@ -36,7 +36,7 @@ abstract class AbstractShader {
         this.filepath = filepath;
     }
 
-    async init(bindGroupLayouts: GPUBindGroupLayout[], code: string) {
+    async init(bindGroupLayouts: GPUBindGroupLayout[], code: string, options?: Partial<GPURenderPipelineDescriptor>) {
         this.label = `${AbstractShader.labelPrefix}: ${this.filepath}`;
         this.module = engine.device.createShaderModule({ label: this.label, code });
     }
@@ -49,8 +49,8 @@ export class GraphicsShader extends AbstractShader {
         super(filepath);
     }
 
-    override async init(bindGroupLayouts: GPUBindGroupLayout[], code: string): Promise<void> {
-        await super.init(bindGroupLayouts, code);
+    override async init(bindGroupLayouts: GPUBindGroupLayout[], code: string, options: Partial<GPURenderPipelineDescriptor>): Promise<void> {
+        await super.init(bindGroupLayouts, code, options);
 
         const layout = this.device.createPipelineLayout({ bindGroupLayouts });
 
@@ -83,6 +83,7 @@ export class GraphicsShader extends AbstractShader {
                 depthCompare: 'less',
                 format: 'depth24plus',
             },
+            ...options
         });
     }
 }

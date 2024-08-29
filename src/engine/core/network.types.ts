@@ -6,8 +6,19 @@ export interface SceneObject {
     }[],
     model?: string,
     material?: string,
+    /**
+     * Collider shapes
+     */
+    shapes: Shape[],
     objects?: SceneObject[]
 }
+
+export interface Shape {
+    shapeID: number,
+    type: ShapeType
+}
+
+export type ShapeType = 'Box' | 'sphere';
 
 export interface SceneDataRequest {
     type: "sceneData",
@@ -28,17 +39,25 @@ export interface SyncRequest {
     input: {}
 }
 
-export interface TransformSyncData {
+export interface TransformSync {
     gameObjectID: number,
     position: [number, number, number],
     rotation: [number, number, number, number],
-    scale: [number, number, number]
+    scale: [number, number, number],
+    shapeTransforms: ShapeTransformSync[]
+}
+
+export interface ShapeTransformSync {
+    shapeID: number,
+    position: [number, number, number],
+    rotation: [number, number, number, number],
+    scale: [number, number, number],
 }
 
 export interface SyncResponse {
     type: "sync",
     send_timestamp: number,
-    transform: TransformSyncData[]
+    transform: TransformSync[],
 }
 
 // ===

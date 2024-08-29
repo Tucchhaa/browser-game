@@ -53,7 +53,7 @@ export class Transform extends Component {
     getDirection() { return this.direction; }
 
     updateAbsoluteValues() {
-        const parent = this.gameObject.parent?.transform;
+        const parent = this.gameObject?.parent?.transform;
 
         if(parent?._changed) {
             this.parentAbsolutePosition = parent.getAbsolutePosition();

@@ -1,8 +1,9 @@
 import { engine, EngineEventListener } from ".";
-import { Mesh, Camera, DirectLight, PointLight, Sync } from "../components";
+import { Mesh, Camera, DirectLight, PointLight, Sync, Collider } from "../components";
 
 interface SceneComponents {
     meshes: Mesh[],
+    colliders: Collider[],
     directLights: DirectLight[],
     pointLights: PointLight[]
 }
@@ -12,32 +13,23 @@ export class Scene extends EngineEventListener {
 
     // TODO: use caching
     getSceneComponents(): SceneComponents {
-        const meshes = [];
-        const directLights = [];
-        const pointLights = [];
+        const meshes:       Mesh[]        = [];
+        const colliders:    Collider[]    = [];
+        const directLights: DirectLight[] = [];
+        const pointLights:  PointLight[]  = [];
 
         engine.tree.traverse(gameObject => {
-            const _meshes           = gameObject.components.getAll(Mesh);
-            const _directLights = gameObject.components.getAll(DirectLight);
-            const _pointLights   = gameObject.components.getAll(PointLight);
+            const _meshes: Mesh[]              = gameObject.components.getAll(Mesh);
+            const _colliders: Collider[]       = gameObject.components.getAll(Collider);
+            const _directLights: DirectLight[] = gameObject.components.getAll(DirectLight);
+            const _pointLights: PointLight[]   = gameObject.components.getAll(PointLight);
 
-            if(meshes)       meshes.push(..._meshes);
-            if(directLights) directLights.push(..._directLights);
-            if(pointLights)  pointLights.push(..._pointLights);
+            if(meshes)         meshes      .push(..._meshes);
+            if(colliders)      colliders   .push(..._colliders);
+            if(directLights)   directLights.push(..._directLights);
+            if(pointLights)    pointLights .push(..._pointLights);
         });
 
-        return { meshes, directLights, pointLights };
-    }
-
-    getSyncComponents() {
-        const networkComponents: Sync[] = [];
-
-        engine.tree.traverse(gameObject => {
-            const _networkComponents = gameObject.components.getAll(Sync);
-
-            if(_networkComponents) networkComponents.push(..._networkComponents);
-        });
-
-        return networkComponents;
+        return { meshes, colliders, directLights, pointLights };
     }
 }

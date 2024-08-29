@@ -1,7 +1,7 @@
 {
   // https://www.totaltypescript.com/tsconfig-cheat-sheet
   "include": ["src/**/*.ts", "src/**/*.js"],
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "src/server"],
 
   "compilerOptions": {
     "esModuleInterop": true,

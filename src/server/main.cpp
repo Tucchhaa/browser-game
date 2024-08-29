@@ -25,8 +25,11 @@ public:
         car->transform->translate(vec3(0, 100, 0));
         car->transform->rotate(quat(vec3(0, 1, 0), 3.1415f));
 
-        auto carShape = make_shared<btBoxShape>(vec3(1, 1, 1));
-        auto carCollider = make_shared<Collider>(physicsWorld, carShape);
+        auto carShape = make_shared<Shape>(
+            make_shared<btTransform>(btTransform::getIdentity()),
+            Collider::createBoxShape(vec3(0.5, 0.25, 1))
+        );
+        auto carCollider = make_shared<Collider>(physicsWorld, vector { carShape });
 
         car->components.add(carCollider);
 
@@ -38,8 +41,15 @@ public:
 
         ground->transform->scaleBy(vec3(10, 1, 10));
 
-        auto groundShape = make_shared<btBoxShape>(vec3(10, 1, 10));
-        auto groundCollider = make_shared<Collider>(physicsWorld, groundShape);
+        auto groundShapeTransform = make_shared<btTransform>(btTransform::getIdentity());
+        groundShapeTransform->setOrigin(vec3(0, -1, 0));
+
+        auto groundShape = make_shared<Shape>(
+            groundShapeTransform,
+            Collider::createBoxShape(vec3(10, 1, 10))
+        );
+
+        auto groundCollider = make_shared<Collider>(physicsWorld, vector { groundShape });
         groundCollider->setMass(0.f);
 
         ground->components.add(groundCollider);
@@ -101,7 +111,7 @@ public:
         return {
             { "type", message["type"] },
             { "send_timestamp", message["send_timestamp"] },
-            { "transform", scene->getTransformData() }
+            { "transform", scene->getTransformData() },
         };
     }
 
