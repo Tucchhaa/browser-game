@@ -39,14 +39,14 @@ public:
         ground->model = "plane.obj";
         ground->material = "plane.mtl";
 
-        ground->transform->scaleBy(vec3(10, 1, 10));
+        ground->transform->scaleBy(vec3(30, 1, 30));
 
         auto groundShapeTransform = make_shared<btTransform>(btTransform::getIdentity());
         groundShapeTransform->setOrigin(vec3(0, -1, 0));
 
         auto groundShape = make_shared<Shape>(
             groundShapeTransform,
-            Collider::createBoxShape(vec3(10, 1, 10))
+            Collider::createBoxShape(vec3(30, 1, 30))
         );
 
         auto groundCollider = make_shared<Collider>(physicsWorld, vector { groundShape });

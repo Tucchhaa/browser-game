@@ -1,6 +1,6 @@
 import { Shape } from "../core/network.types";
-import { engine } from "../core";
-import { Component, Mesh, MeshShaderData, Transform } from ".";
+import { engine, MeshShaderData } from "../core";
+import { Component, Mesh, Transform } from ".";
 
 type MeshesDict = Map<number, { mesh: Mesh, transform: Transform }>;
 

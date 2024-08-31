@@ -33,10 +33,15 @@ struct Vertex {
 @group(0) @binding(0) var<uniform> camera: Camera;
 @group(0) @binding(1) var<storage, read> directLights: array<DirectLight>;
 @group(0) @binding(2) var<storage, read> pointLights: array<PointLight>;
+@group(0) @binding(3) var shadowMap: texture_depth_2d_array;
+@group(0) @binding(4) var shadowMapSampler: sampler_comparison;
 
 @group(1) @binding(0) var<uniform> transform: mat4x4f;
 @group(1) @binding(1) var<uniform> normalTransform: mat3x3f;
 @group(1) @binding(2) var<uniform> material: Material;
+
+@group(2) @binding(0) var<storage, read> lightPerspectives: array<mat4x4f>;
+@group(2) @binding(1) var<storage, read> cascadePlanes: array<f32>;
 
 @vertex fn vertex_main(
     @location(0) position: vec3f,
@@ -62,7 +67,9 @@ struct Vertex {
     var cameraDir = normalize(camera.position - vertex.worldPosition);
 
     for(var i=0u; i < arrayLength(&directLights); i++) {
-        color += calc_direct_light(directLights[i], cameraDir, normal);
+        var shadow = calc_shadow(vertex);
+
+        color += shadow * calc_direct_light(directLights[i], cameraDir, normal);
     }
 
     return vec4f(color, 1.0);
@@ -81,4 +88,49 @@ fn calc_blinn_phong_coef(cameraDir: vec3f, lightDir: vec3f, normal: vec3f) -> f3
     var halfway: vec3f = normalize(cameraDir + lightDir);
 
     return pow(max(dot(normal, halfway), 0.0), 32.0 * 5.0);
+}
+
+fn calc_shadow(vertex: Vertex) -> f32 {
+    var layer = calc_shadow_layer(vertex);
+    var lightSpacePos = lightPerspectives[layer] * vec4(vertex.worldPosition, 1.0);
+    var coords = vec3(lightSpacePos.xy * vec2(0.5, -0.5) + vec2(0.5), lightSpacePos.z);
+
+    var resolution = textureDimensions(shadowMap, 0).xy;
+    var texelSize = vec2(1.0) / vec2f(resolution);
+
+    var shadow = 0.0;
+
+    for(var x = -1; x <= 1; x++) {
+        for(var y = -1; y <= 1; y++) {
+            var offset = vec2f(vec2(x, y)) * texelSize;
+
+            shadow += textureSampleCompare(
+                shadowMap, shadowMapSampler,
+                coords.xy + offset,
+                layer,
+                coords.z - 0.0007,
+            );
+        }
+    }
+
+    shadow /= 9.0;
+
+    if(coords.z >= 1.0) {
+        return 1.0;
+    }
+
+    return shadow;
+}
+
+fn calc_shadow_layer(vertex: Vertex) -> u32 {
+    var cascadeCount = arrayLength(&cascadePlanes);
+    var depth = abs(vertex.fragPosition.z / vertex.fragPosition.w);
+
+    for(var i=0u; i < cascadeCount; i++) {
+        if(depth < cascadePlanes[i]) {
+            return i;
+        }
+    }
+
+    return cascadeCount - 1;
 }

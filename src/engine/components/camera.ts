@@ -4,9 +4,9 @@ import { Component } from ".";
 import { engine } from "../core";
 
 export class Camera extends Component {
-    private far: number;
-    private near: number;
-    private fov: number;
+    readonly far: number;
+    readonly near: number;
+    readonly fov: number;
 
     private screenWidth: number;
     private screenHeight: number;
@@ -46,6 +46,10 @@ export class Camera extends Component {
 
     getProjectionMatrix() {
         return this.projectionMatrix;
+    }
+
+    getAspect() {
+        return this.aspect;
     }
 
     private setScreenSizes(width: number, height: number) {

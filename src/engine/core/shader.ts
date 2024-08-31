@@ -1,22 +1,23 @@
 import { engine } from ".";
 
 export class ShaderFactory {
-    bindGroupLayouts: GPUBindGroupLayout[];
-
-    constructor(bindGroupLayouts: GPUBindGroupLayout[]) {
-        this.bindGroupLayouts = bindGroupLayouts;
-    }
-
-    async createGraphicsShader(filepath: string, options?: Partial<GPURenderPipelineDescriptor>): Promise<GraphicsShader> {
+    static async createGraphicsShader(
+        filepath: string,
+        bindGroups: ('mesh' | 'scene' | 'shadow' | 'cascade')[],
+        options?: Partial<GPURenderPipelineDescriptor>,
+    ): Promise<GraphicsShader> {
         const instance = new GraphicsShader(filepath);
-        const code = await engine.loader.loadTextFile(filepath);
 
-        await instance.init(this.bindGroupLayouts, code, options);
+        const code = await engine.loader.loadTextFile(filepath);
+        const bindGroupLayouts = engine.renderer.getBindGroupLayouts();
+        const shaderBGL = bindGroups.map(group => bindGroupLayouts[group]);
+
+        await instance.init(shaderBGL, code, options);
 
         return instance;
     }
 
-    async createComputeShader(filepath: string) {
+    static async createComputeShader(filepath: string) {
         throw new Error("Not implemented");
     }
 }

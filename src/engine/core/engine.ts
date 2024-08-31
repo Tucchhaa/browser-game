@@ -3,6 +3,7 @@ import { Texture } from "../resources";
 
 export class Engine {
     device: GPUDevice;
+    limits: GPUSupportedLimits;
     canvas: HTMLCanvasElement;
     ctx: GPUCanvasContext;
     textureFormat: GPUTextureFormat;
@@ -12,7 +13,6 @@ export class Engine {
     input: Input;
     tree: Tree;
     loader: Loader;
-    shaderFactory: ShaderFactory;
     renderer: Renderer;
 
     async init(device: GPUDevice, canvas: HTMLCanvasElement) {
@@ -20,6 +20,7 @@ export class Engine {
         (window as any)._$ = this;
 
         this.device = device;
+        this.limits = this.device.limits;
         this.canvas = canvas;
 
         this.initCanvas();
@@ -27,13 +28,10 @@ export class Engine {
         this.network = new Network("ws://localhost:8081/ws");
         await this.network.open();
 
-        this.input = new Input();
-        this.tree = new Tree();
-        this.loader = new Loader();
-        this.renderer = new Renderer();
-        this.shaderFactory = new ShaderFactory([
-            this.renderer.sceneBindGroupLayout, this.renderer.meshBindGroupLayout
-        ]);
+        this.input         = new Input();
+        this.tree          = new Tree();
+        this.loader        = new Loader();
+        this.renderer      = new Renderer();
 
         await EngineEventListener.setup();
         await Texture.setup();
@@ -53,12 +51,14 @@ export class Engine {
             that.canvas.width = window.innerWidth * 2;
             that.canvas.height = window.innerHeight * 2;
 
-            that.renderer?.onResize();
+            EngineEventListener.onResize();
         }
     }
 
     start() {
         // this.renderer.render();
+
+        EngineEventListener.onStart();
 
         if(this.scene === undefined) {
             throw new Error("Scene is not defined");
