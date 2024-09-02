@@ -113,6 +113,7 @@ export class ShadowMapRenderer extends EngineEventListener {
                 pass.setVertexBuffer(0, mesh.vertexBuffer);
 
                 pass.draw(mesh.vertexCount);
+                engine.frameStats.triangles += mesh.vertexCount / 3;
             }
 
             pass.end();

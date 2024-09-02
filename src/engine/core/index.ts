@@ -2,6 +2,7 @@ export * from './engine'
 export * from './engine-event-listener'
 export * from './game-object'
 
+export * from './ui'
 export * from './input'
 export * from './loader'
 export * from './network'

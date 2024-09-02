@@ -99,6 +99,7 @@ export class MeshRenderer extends EngineEventListener {
             pass.setVertexBuffer(0, mesh.vertexBuffer);
 
             pass.draw(mesh.vertexCount);
+            engine.frameStats.triangles += mesh.vertexCount / 3;
         }
 
         // Render colliders
@@ -111,6 +112,7 @@ export class MeshRenderer extends EngineEventListener {
                 pass.setVertexBuffer(0, mesh.vertexBuffer);
 
                 pass.draw(mesh.vertexCount);
+                engine.frameStats.triangles += mesh.vertexCount / 3;
             }
         }
 

@@ -5,7 +5,7 @@ import { Camera, DirectLight, CharacterController } from "./engine/components";
 
 window.addEventListener('load', main);
 
-const canvas = document.getElementById("main_canvas") as HTMLCanvasElement;
+const root = document.getElementById("game");
 
 async function main() {
     const adapter = await navigator.gpu.requestAdapter();
@@ -15,7 +15,7 @@ async function main() {
         throw new Error("WebGPU is not supported on this device");
     }
 
-    await engine.init(device, canvas);
+    await engine.init(device, root);
 
     engine.scene = await engine.loader.loadScene("scene1");
 
