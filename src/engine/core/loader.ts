@@ -62,7 +62,7 @@ export class Loader {
 
             engine.tree.addChild(parent, gameObject);
 
-            for(const child of sceneObject.objects) {
+            for(const child of sceneObject.children) {
                 await handleSceneObject(gameObject, child);
             }
         }

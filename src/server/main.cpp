@@ -103,7 +103,7 @@ public:
         return {
             { "type", message["type"] },
             { "sceneName", scene->name },
-            { "root", scene->getSceneRootJSON() }
+            { "root", SceneSerializer::getSceneData(scene) }
         };
     }
 
@@ -111,7 +111,7 @@ public:
         return {
             { "type", message["type"] },
             { "send_timestamp", message["send_timestamp"] },
-            { "transform", scene->getTransformData() },
+            { "transform", SceneSerializer::getTransformData(scene) },
         };
     }
 
@@ -159,7 +159,7 @@ int main() {
         nlohmann::json response;
         response["type"] = "requestSceneData";
         response["sceneName"] = "scene1";
-        response["data"] = mainRoom->scene->getSceneRootJSON();
+        response["data"] = SceneSerializer::getSceneData(mainRoom->scene);
 
         return response.dump();
     });

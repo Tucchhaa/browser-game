@@ -10,13 +10,21 @@ Scene::Scene() {
     physicsWorld = make_shared<PhysicsWorld>();
 }
 
-json Scene::getSceneRootJSON(const shared_ptr<GameObject>& gameObject) const {
-    auto current = gameObject == nullptr ? tree.root : gameObject;
+void Scene::tick(float dt) {
+    physicsWorld->dynamicsWorld->stepSimulation(dt);
+}
 
-    vector<json> objects;
+// ===
+// Scene serializer
+// ===
+
+json SceneSerializer::getSceneData(const shared_ptr<Scene>& scene, const shared_ptr<GameObject>& gameObject) {
+    auto current = gameObject == nullptr ? scene->tree.root : gameObject;
+
+    vector<json> children;
 
     for(const auto& child: current->children) {
-        objects.push_back(getSceneRootJSON(child));
+        children.push_back(getSceneData(scene, child));
     }
 
     vector<json> shapes;
@@ -32,18 +40,17 @@ json Scene::getSceneRootJSON(const shared_ptr<GameObject>& gameObject) const {
         }
     }
 
-    // TODO: move json to a separate class
     return {
         { "ID", current->ID },
         { "name", current->name },
         { "model", current->model },
         { "material", current->material },
         { "shapes",  shapes },
-        { "objects",  objects }
+        { "children",  children }
     };
 }
 
-json Scene::getTransformData() {
+json SceneSerializer::getTransformData(const shared_ptr<Scene>& scene) {
     vector<json> list;
 
     const auto getObjectTransformData = [&list](const shared_ptr<GameObject>& gameObject) {
@@ -99,11 +106,7 @@ json Scene::getTransformData() {
         });
     };
 
-    tree.traverse(getObjectTransformData);
+    scene->tree.traverse(getObjectTransformData);
 
     return list;
-}
-
-void Scene::tick(float dt) {
-    physicsWorld->dynamicsWorld->stepSimulation(dt);
 }

@@ -44,7 +44,7 @@ shared_ptr<GameObject> Tree::spawnGameObject() {
     return gameObject;
 }
 
-void Tree::traverse(const function<void(shared_ptr<GameObject>& gameObject)>& callback) {
+void Tree::traverse(const function<void(shared_ptr<GameObject>& gameObject)>& callback) const {
     traverseChildren(root, callback);
 }
 

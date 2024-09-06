@@ -25,7 +25,7 @@ public:
 
     shared_ptr<GameObject> spawnGameObject();
 
-    void traverse(const function<void(shared_ptr<GameObject>&)>& callback);
+    void traverse(const function<void(shared_ptr<GameObject>&)>& callback) const;
 
     static void traverseChildren(
         const shared_ptr<GameObject>& gameObject,

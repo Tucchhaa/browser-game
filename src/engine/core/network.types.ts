@@ -10,7 +10,7 @@ export interface SceneObject {
      * Collider shapes
      */
     shapes: Shape[],
-    objects?: SceneObject[]
+    children?: SceneObject[]
 }
 
 export interface Shape {
