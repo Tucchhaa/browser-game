@@ -2,20 +2,17 @@
 
 #include <queue>
 
-GameObject::GameObject(Transform& transform): components(*this) {
+GameObject::GameObject(Transform& transform) {
     ID = generateId();
 
     name = "gameObject_" + to_string(ID);
     model = "";
     material = "";
+    visible = true;
 
     this->transform = make_shared<Transform>(transform);
 
     components.add(this->transform);
 }
 
-GameObject::GameObject(): transform(new Transform()), components(*this) {
-    ID = generateId();
-
-    components.add(transform);
-}
+// GameObject::GameObject(): GameObject(*make_shared<Transform>()) {}

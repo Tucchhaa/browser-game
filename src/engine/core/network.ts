@@ -91,16 +91,19 @@ export class Network extends EngineEventListener {
         this.socket.send(JSON.stringify({
             type: "sync",
             send_timestamp: Date.now(),
-            input: {}
+            input: engine.input.getInputData()
         }));
     }
 
     private sync(message: SyncResponse) {
+        debugger;
         for(const transform of message.transform) {
             const gameObject = engine.tree.getGameObjectByID(transform.gameObjectID);
 
             if(!gameObject)
                 continue;
+
+            gameObject.visible = transform.visible;
 
             const syncComponent = gameObject.components.get(Sync); // TODO: use caching
 

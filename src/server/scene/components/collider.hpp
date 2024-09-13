@@ -45,7 +45,6 @@ private:
 
 class Collider: public ObjectComponent {
 public:
-
     explicit Collider(
         const shared_ptr<PhysicsWorld> &physicsWorld,
         const vector<shared_ptr<Shape>> &shapes
@@ -61,16 +60,26 @@ public:
 
     bool isDynamic() const;
 
+    bool enabled() const { return m_enabled; }
+    void enable();
+    void disable();
+
     shared_ptr<btRigidBody> rigidBody() const { return m_rigidBody; }
 
     const vector<shared_ptr<Shape>>& shapes() const { return m_shapes; }
 
     /**
-     * Updates transform of game object from collider transform
+     * Updates transform of game object from rigid body transform
      */
-    void updateTransformFromCollider() const;
+    void updateTransformFromRigidbody() const;
+
+    /**
+     * Resets rigid body transform to game object transform
+     */
+    void resetRigidbodyTransform() const;
 
 private:
+    bool m_enabled = true;
     shared_ptr<btCompoundShape> m_shape;
     vector<shared_ptr<Shape>> m_shapes;
     shared_ptr<btRigidBody> m_rigidBody;
@@ -81,5 +90,4 @@ private:
 
     shared_ptr<btRigidBody> createRigidBody() const;
 
-    void resetRigidbodyTransform() const;
 };

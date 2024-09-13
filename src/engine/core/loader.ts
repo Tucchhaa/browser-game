@@ -57,6 +57,7 @@ export class Loader {
             const colliderComponent = await Collider.create(shapes);
 
             gameObject.ID = sceneObject.ID;
+            gameObject.name = sceneObject.name;
             gameObject.components.add(syncComponent);
             gameObject.components.add(colliderComponent);
 

@@ -33,14 +33,29 @@ export interface SceneDataResponse {
 
 // ===
 
+export interface InputData {
+    keyboard: {
+        forward: boolean,
+        backward: boolean,
+        left: boolean,
+        right: boolean,
+        jump: boolean
+    },
+    mouse: {
+        leftButton: boolean,
+        rightButton: boolean,
+    }
+}
+
 export interface SyncRequest {
     type: "sync",
     send_timestamp: number,
-    input: {}
+    input: InputData,
 }
 
 export interface TransformSync {
     gameObjectID: number,
+    visible: boolean,
     position: [number, number, number],
     rotation: [number, number, number, number],
     scale: [number, number, number],

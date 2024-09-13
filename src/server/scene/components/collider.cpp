@@ -1,5 +1,9 @@
 #include "collider.hpp"
+
+#include <crow/logging.h>
+
 #include "transform.hpp"
+#include "../game-object.hpp"
 
 Collider::Collider(
     const shared_ptr<PhysicsWorld> &physicsWorld,
@@ -56,6 +60,17 @@ bool Collider::isDynamic() const {
     return m_mass != 0.f;
 }
 
+void Collider::enable() {
+    m_rigidBody->forceActivationState(ACTIVE_TAG);
+    m_rigidBody->activate(true);
+    m_enabled = true;
+}
+
+void Collider::disable() {
+    m_rigidBody->forceActivationState(ISLAND_SLEEPING);
+    m_enabled = false;
+}
+
 shared_ptr<btRigidBody> Collider::createRigidBody() const {
     btVector3 localInertia(0, 0, 0);
     if (isDynamic())
@@ -76,20 +91,20 @@ void Collider::resetRigidbodyTransform() const {
     rigidbodyTransform.setOrigin(transform()->getPosition());
     rigidbodyTransform.setRotation(transform()->getRotation());
 
+    if (m_rigidBody && m_rigidBody->getMotionState())
+        m_rigidBody->getMotionState()->setWorldTransform(rigidbodyTransform);
+
     m_rigidBody->setWorldTransform(rigidbodyTransform);
 }
 
-void Collider::updateTransformFromCollider() const {
+void Collider::updateTransformFromRigidbody() const {
     btTransform colliderTransform;
 
     if (m_rigidBody && m_rigidBody->getMotionState())
         m_rigidBody->getMotionState()->getWorldTransform(colliderTransform);
-    else
-        colliderTransform = m_rigidBody->getWorldTransform();
 
-    const btVector3 position = colliderTransform.getOrigin();
-    const btQuaternion rotation = colliderTransform.getRotation();
+    colliderTransform = m_rigidBody->getWorldTransform();
 
-    transform()->setPosition(position.x(), position.y(), position.z());
-    transform()->setRotation(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+    transform()->setPosition(colliderTransform.getOrigin());
+    transform()->setRotation(colliderTransform.getRotation());
 }

@@ -11,6 +11,15 @@ Scene::Scene() {
 }
 
 void Scene::tick(float dt) {
+    for(const auto& player: players) {
+        if(player->object == nullptr) {
+            player->object = addPlayerObject(player);
+        }
+        else {
+            processUserInput(player);
+        }
+    }
+
     physicsWorld->dynamicsWorld->stepSimulation(dt);
 }
 
@@ -18,6 +27,7 @@ void Scene::tick(float dt) {
 // Scene serializer
 // ===
 
+// TODO: use caching
 json SceneSerializer::getSceneData(const shared_ptr<Scene>& scene, const shared_ptr<GameObject>& gameObject) {
     auto current = gameObject == nullptr ? scene->tree.root : gameObject;
 
@@ -86,6 +96,7 @@ json SceneSerializer::getTransformData(const shared_ptr<Scene>& scene) {
 
         list.push_back({
             {"gameObjectID", gameObject->ID },
+            { "visible", gameObject->visible },
             {"position", {
                 transform->getPosition().x(),
                 transform->getPosition().y(),

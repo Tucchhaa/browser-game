@@ -7,13 +7,10 @@
 using namespace std;
 
 class ComponentsManager {
-private:
-    shared_ptr<GameObject> gameObject;
-
-    vector<shared_ptr<ObjectComponent>> components;
-
 public:
-    explicit ComponentsManager(GameObject &gameObject);
+    ComponentsManager() = default;
+
+    void setGameObject(const shared_ptr<GameObject>& gameObject) { this->gameObject = gameObject; }
 
     template<typename T>
     shared_ptr<T> getOptional();
@@ -30,6 +27,10 @@ public:
     void add(const shared_ptr<ObjectComponent> &component);
 
 private:
+    shared_ptr<GameObject> gameObject;
+
+    vector<shared_ptr<ObjectComponent>> components;
+
     /**
      * returns components of objectId
      */

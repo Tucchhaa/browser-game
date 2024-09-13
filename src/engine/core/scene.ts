@@ -19,6 +19,9 @@ export class Scene extends EngineEventListener {
         const pointLights:  PointLight[]  = [];
 
         engine.tree.traverse(gameObject => {
+            if(!gameObject.visible)
+                return;
+
             const _meshes: Mesh[]              = gameObject.components.getAll(Mesh);
             const _colliders: Collider[]       = gameObject.components.getAll(Collider);
             const _directLights: DirectLight[] = gameObject.components.getAll(DirectLight);

@@ -21,10 +21,24 @@ public:
     string name;
     string model;
     string material;
+    bool visible;
 
-    GameObject();
+    /**
+     * Don't use it directly, use GameObject::create() instead
+     */
     explicit GameObject(Transform& transform);
 
+    static shared_ptr<GameObject> create(Transform& transform) {
+        auto gameObject = make_shared<GameObject>(transform);
+
+        gameObject->components.setGameObject(gameObject);
+
+        return gameObject;
+    }
+
+    static shared_ptr<GameObject> create() {
+        return create(*make_shared<Transform>());
+    }
 private:
     static inline int lastID = 1;
 

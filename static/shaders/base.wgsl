@@ -95,25 +95,12 @@ fn calc_shadow(vertex: Vertex) -> f32 {
     var lightSpacePos = lightPerspectives[layer] * vec4(vertex.worldPosition, 1.0);
     var coords = vec3(lightSpacePos.xy * vec2(0.5, -0.5) + vec2(0.5), lightSpacePos.z);
 
-    var resolution = textureDimensions(shadowMap, 0).xy;
-    var texelSize = vec2(1.0) / vec2f(resolution);
-
-    var shadow = 0.0;
-
-    for(var x = -1; x <= 1; x++) {
-        for(var y = -1; y <= 1; y++) {
-            var offset = vec2f(vec2(x, y)) * texelSize;
-
-            shadow += textureSampleCompare(
-                shadowMap, shadowMapSampler,
-                coords.xy + offset,
-                layer,
-                coords.z - 0.0007,
-            );
-        }
-    }
-
-    shadow /= 9.0;
+    var shadow = textureSampleCompare(
+        shadowMap, shadowMapSampler,
+        coords.xy,
+        layer,
+        coords.z - 0.0007,
+    );
 
     if(coords.z >= 1.0) {
         return 1.0;

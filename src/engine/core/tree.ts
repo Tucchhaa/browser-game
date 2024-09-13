@@ -25,6 +25,7 @@ export class Tree extends EngineEventListener {
         this.id_gameObject.set(child.ID, child);
         parent.children.push(child);
         child.parent = parent;
+        child.visible = parent.visible;
     }
 
     removeChild(parent: GameObject, child: GameObject) {

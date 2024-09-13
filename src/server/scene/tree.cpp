@@ -3,7 +3,7 @@
 #include <queue>
 
 Tree::Tree() {
-    root = make_shared<GameObject>();
+    root = GameObject::create();
     root->name = "server-root";
 }
 
@@ -33,7 +33,7 @@ void Tree::addGameObject(shared_ptr<GameObject>& gameObject) {
 }
 
 shared_ptr<GameObject> Tree::createGameObject() {
-    return make_shared<GameObject>(GameObject());
+    return GameObject::create();
 }
 
 shared_ptr<GameObject> Tree::spawnGameObject() {

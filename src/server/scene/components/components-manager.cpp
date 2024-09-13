@@ -6,10 +6,6 @@
 #include "../game-object.hpp"
 #include "../tree.hpp"
 
-ComponentsManager::ComponentsManager(GameObject& gameObject) {
-    this->gameObject = make_shared<GameObject>(gameObject);
-}
-
 template<typename T>
 vector<shared_ptr<T>> ComponentsManager::_get(const bool all, bool required) {
     vector<shared_ptr<T>> result;

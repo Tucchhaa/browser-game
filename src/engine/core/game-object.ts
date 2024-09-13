@@ -1,10 +1,13 @@
 import { Transform, Component } from "../components";
+import { Tree } from ".";
 
 type ComponentType<T extends Component> = new (...args: any[]) => T;
 
 export class GameObject {
     // Negative ID means that the object is on the client side
     ID: number;
+    name: string = "";
+    private _visible: boolean;
 
     components: ComponentsManager;
     transform: Transform;
@@ -14,6 +17,8 @@ export class GameObject {
 
     constructor() {
         this.ID = GameObject.generateID();
+        this._visible = true;
+
         this.components = new ComponentsManager(this);
         this.transform = new Transform();
         this.parent = null;
@@ -23,6 +28,19 @@ export class GameObject {
     }
 
     get isServerSide() { return this.ID >= 0; }
+
+    get visible() { return this._visible; }
+    set visible(value: boolean) {
+        if(value == true && this.parent && this.parent.visible == false) {
+            console.warn("Setting object visible while parent is invisible");
+            return;
+        }
+
+        this._visible = value;
+        
+        for(const child of this.children)
+            child.visible = value;
+    }
 
     static count = 0;
 
