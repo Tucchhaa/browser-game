@@ -16,7 +16,7 @@ void Scene::tick(float dt) {
             player->object = addPlayerObject(player);
         }
         else {
-            processUserInput(player);
+            processPlayerInput(player);
         }
     }
 

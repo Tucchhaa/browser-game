@@ -1,5 +1,6 @@
 import { EngineEventListener, engine } from ".";
 import {
+    PlayerDataResponse,
     ResponseMessage,
     SceneDataRequest,
     SceneObject,
@@ -16,6 +17,9 @@ export class Network extends EngineEventListener {
 
     private requestScenePromiseResolve;
     private requestScenePromiseReject;
+
+    private requestPlayerPromiseResolve;
+    private requestPlayerPromiseReject;
 
     get opened() { return this.socket?.readyState === WebSocket.OPEN; }
 
@@ -55,6 +59,19 @@ export class Network extends EngineEventListener {
         }, 1000 / 60);
     }
 
+    async requestPlayerData(): Promise<PlayerDataResponse> {
+        this.socket.send(
+            JSON.stringify({
+                type: "playerData"
+            })
+        );
+
+        return new Promise((resolve, reject) => {
+            this.requestPlayerPromiseResolve = resolve;
+            this.requestPlayerPromiseReject = reject;
+        });
+    }
+
     async requestSceneRoot(sceneName: string): Promise<SceneObject> {
         this.socket.send(
             JSON.stringify({
@@ -79,6 +96,8 @@ export class Network extends EngineEventListener {
             switch (message.type) {
                 case "sceneData":
                     return that.requestScenePromiseResolve?.call(this, message.root);
+                case "playerData":
+                    return that.requestPlayerPromiseResolve?.call(this, message);
                 case "sync":
                     return that.sync(message);  // TODO: check send_time
                 default:
@@ -96,7 +115,6 @@ export class Network extends EngineEventListener {
     }
 
     private sync(message: SyncResponse) {
-        debugger;
         for(const transform of message.transform) {
             const gameObject = engine.tree.getGameObjectByID(transform.gameObjectID);
 

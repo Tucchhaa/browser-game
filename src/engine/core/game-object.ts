@@ -1,5 +1,4 @@
 import { Transform, Component } from "../components";
-import { Tree } from ".";
 
 type ComponentType<T extends Component> = new (...args: any[]) => T;
 
@@ -37,7 +36,7 @@ export class GameObject {
         }
 
         this._visible = value;
-        
+
         for(const child of this.children)
             child.visible = value;
     }

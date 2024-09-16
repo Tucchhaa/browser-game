@@ -1,49 +1,67 @@
 import { quat, vec3 } from "wgpu-matrix";
 
-import { engine } from "../core";
+import { engine, GameObject } from "../core";
 import { Component, WorldTransform } from ".";
 
 const speed = 0.1;
 const rotationSpeed = 0.02;
 
-export class CharacterController extends Component {
-    posX = 0;
-    negX = 0;
-    posY = 0;
-    negY = 0;
-
-    shift = false;
-
+export class FreeCameraController extends Component {
     override beforeRender() {
-        this.readInput();
         this.move();
     }
 
-    private readInput() {
-        this.posX = engine.input.isKeyPressed("KeyD") ? 1 : 0;
-        this.negX = engine.input.isKeyPressed("KeyA") ? -1 : 0;
-        this.posY = engine.input.isKeyPressed("KeyW") ? 1 : 0;
-        this.negY = engine.input.isKeyPressed("KeyS") ? -1 : 0;
-
-        this.shift = engine.input.isKeyPressed("ShiftLeft");
-    }
-
     private move() {
-        if(this.shift) {
-            const yRotation = quat.fromEuler(0,(this.posX + this.negX) * rotationSpeed, 0, 'xyz');
-            const xRotation = quat.fromEuler((this.posY + this.negY) * rotationSpeed, 0, 0, 'xyz');
+        const { shift, deltaX, deltaY } = engine.input;
+
+        if(shift) {
+            const yRotation = quat.fromEuler(0,deltaX * rotationSpeed, 0, 'xyz');
+            const xRotation = quat.fromEuler(deltaY * rotationSpeed, 0, 0, 'xyz');
 
             this.transform.rotate(yRotation);
             this.transform.rotate(xRotation, WorldTransform);
         }
         else {
             const translation = vec3.create(
-                (this.posX + this.negX) * speed,
+                deltaX * speed,
                 0,
-                -(this.posY + this.negY) * speed,
+                -deltaY * speed,
             );
 
             this.transform.translate(translation);
+        }
+    }
+}
+
+export class CharacterController extends Component {
+    private characterObject?: GameObject;
+    private deltaPosition = vec3.create(0, 2, 5);
+
+    setCharacterObject(characterObject: GameObject) {
+        this.characterObject = characterObject;
+    }
+
+    override beforeRender() {
+        if(this.characterObject === undefined) {
+            return;
+        }
+
+        this.move();
+    }
+
+    private move() {
+        this.transform.position =  vec3.add(
+            this.characterObject.transform.position, this.deltaPosition
+        );
+
+        const { shift, deltaX, deltaY } = engine.input;
+
+        if(shift) {
+            const yRotation = quat.fromEuler(0,deltaX * rotationSpeed, 0, 'xyz');
+            const xRotation = quat.fromEuler(deltaY * rotationSpeed, 0, 0, 'xyz');
+
+            this.transform.rotate(yRotation);
+            this.transform.rotate(xRotation, WorldTransform);
         }
     }
 }

@@ -1,5 +1,6 @@
 import { EngineEventListener } from "./engine-event-listener";
 import { InputData } from "./network.types";
+import { engine } from "./engine";
 
 enum KeyState {
     None,
@@ -8,20 +9,26 @@ enum KeyState {
     Pressed,
 }
 
-export class Input extends EngineEventListener {
-    private readonly keyCodes = [
+class BaseInput extends EngineEventListener {
+    protected readonly keyCodes = [
         'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyW', 'Space', 'ShiftLeft'
     ];
-    private readonly keyStateMap: Map<string, KeyState> = new Map(); // states: down, up, pressed
+    protected readonly keyStateMap: Map<string, KeyState> = new Map(); // states: down, up, pressed
 
-    private readonly mouseState = {
+    protected readonly mouseState = {
         leftButton: false,
         rightButton: false,
+        deltaX: 0,
+        deltaY: 0
     };
 
     override async setup() {
         for(const key of this.keyCodes)
             this.keyStateMap.set(key, KeyState.None);
+
+        engine.canvas.addEventListener("click", e => {
+            engine.canvas.requestPointerLock();
+        });
 
         window.addEventListener("keydown", (e) => {
             this.keyStateMap.set(e.code, KeyState.Down);
@@ -31,6 +38,8 @@ export class Input extends EngineEventListener {
         });
 
         window.addEventListener("mousemove", (e) => {
+            this.mouseState.deltaX = e.movementX;
+            this.mouseState.deltaY = e.movementY;
         });
         window.addEventListener("mousedown", (e) => {
             if(e.button === 0)
@@ -60,23 +69,58 @@ export class Input extends EngineEventListener {
                 this.keyStateMap.set(key, KeyState.Pressed);
         }
     }
+}
+
+export class Input extends BaseInput {
+    private _deltaX = 0;
+    private _deltaY = 0;
+
+    private _shift = false;
+
+    get deltaX() { return this._deltaX; }
+    get deltaY() { return this._deltaY; }
+    get deltaMouseX() { return this.mouseState.deltaX; }
+    get deltaMouseY() { return this.mouseState.deltaY; }
+    get shift() { return this._shift; }
+
+    override beforeRender() {
+        super.beforeRender();
+
+        this.readInput();
+    }
+
+    readInput() {
+        const posX = engine.input.isKeyPressed("KeyD") ? 1 : 0;
+        const negX = engine.input.isKeyPressed("KeyA") ? -1 : 0;
+        const posY = engine.input.isKeyPressed("KeyW") ? 1 : 0;
+        const negY = engine.input.isKeyPressed("KeyS") ? -1 : 0;
+
+        this._deltaX = posX + negX;
+        this._deltaY = posY + negY;
+        this._shift = engine.input.isKeyPressed("ShiftLeft");
+    }
+
+    getInputData(): InputData {
+        return {
+            deltaX: this.deltaX,
+            deltaZ: this.deltaY,
+            deltaMouseX: this.deltaMouseX,
+            deltaMouseY: this.deltaMouseY,
+            shift: this.shift,
+            mouseLeftButton: engine.input.isLeftButtonPressed(),
+            mouseRightButton: engine.input.isRightButtonPressed(),
+        }
+    }
 
     isKeyPressed(key: string) {
         return [KeyState.Down, KeyState.Pressed].indexOf(this.keyStateMap.get(key)) !== -1;
     }
 
-    getInputData(): InputData {
-        const keyboard = {
-            forward: this.isKeyPressed('KeyW'),
-            backward: this.isKeyPressed('KeyS'),
-            left: this.isKeyPressed('KeyA'),
-            right: this.isKeyPressed('KeyD'),
-            jump: this.isKeyPressed('Space'),
-        }
+    isLeftButtonPressed() {
+        return this.mouseState.leftButton;
+    }
 
-        return {
-            keyboard,
-            mouse: this.mouseState
-        }
+    isRightButtonPressed() {
+        return this.mouseState.rightButton;
     }
 }

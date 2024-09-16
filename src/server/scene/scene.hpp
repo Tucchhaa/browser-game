@@ -11,21 +11,13 @@ using json = nlohmann::json;
 class SceneSerializer;
 
 struct PlayerInput {
-    struct Mouse {
-        bool leftButton;
-        bool rightButton;
-    };
-
-    struct Keyboard {
-        bool forward;
-        bool backward;
-        bool left;
-        bool right;
-        bool jump;
-    };
-
-    Keyboard keyboard{ false, false, false, false, false };
-    Mouse mouse{ false, false };
+    int deltaX;
+    int deltaZ;
+    int deltaScreenX;
+    int deltaScreenY;
+    bool shift;
+    bool mouseLeftButton;
+    bool mouseRightButton;
 };
 
 class Player {
@@ -55,8 +47,10 @@ public:
 
     virtual void tick(float dt);
 
-    void addUser(Player* player) { players.push_back(player); }
-    void removeUser(Player* player) {
+    void addPlayer(Player* player) {
+        players.push_back(player);
+    }
+    void removePlayer(Player* player) {
         removePlayerObject(player);
 
         const auto userIndex = find(players.begin(), players.end(), player);
@@ -80,7 +74,7 @@ protected:
     /**
      * Called every frame to update user's game object according to user's input
      */
-    virtual void processUserInput(Player*) {};
+    virtual void processPlayerInput(Player*) {};
 };
 
 class SceneSerializer {

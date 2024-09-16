@@ -1,3 +1,7 @@
+// ===
+// Scene Data
+// ===
+
 export interface SceneObject {
     ID: number,
     name: string,
@@ -32,19 +36,30 @@ export interface SceneDataResponse {
 }
 
 // ===
+// Player Data
+// ===
+
+export interface PlayerDataRequest {
+    type: "playerData",
+}
+
+export interface PlayerDataResponse {
+    type: "playerData",
+    gameObjectID: number,
+}
+
+// ===
+// Sync
+// ===
 
 export interface InputData {
-    keyboard: {
-        forward: boolean,
-        backward: boolean,
-        left: boolean,
-        right: boolean,
-        jump: boolean
-    },
-    mouse: {
-        leftButton: boolean,
-        rightButton: boolean,
-    }
+    deltaX: number,
+    deltaZ: number,
+    deltaMouseX: number,
+    deltaMouseY: number,
+    shift: boolean,
+    mouseLeftButton: boolean,
+    mouseRightButton: boolean,
 }
 
 export interface SyncRequest {
@@ -77,5 +92,5 @@ export interface SyncResponse {
 
 // ===
 
-export type RequestMessage = SceneDataRequest | SyncRequest;
-export type ResponseMessage = SceneDataResponse | SyncResponse;
+export type RequestMessage = SceneDataRequest | PlayerDataRequest | SyncRequest;
+export type ResponseMessage = SceneDataResponse | PlayerDataResponse | SyncResponse;

@@ -37,4 +37,8 @@ add_executable(browser_game_server
         scene/components/transform.cpp
         scene/components/collider.hpp
         scene/components/collider.cpp
+        room.cpp
+        room.hpp
+        simple_scene.cpp
+        simple_scene.hpp
 )
