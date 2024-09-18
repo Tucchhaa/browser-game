@@ -35,8 +35,10 @@ export class Loader {
         return await response.text();
     }
 
-    async loadScene(scene: string) {
-        const sceneRoot = await engine.network.requestSceneRoot(scene);
+    async loadScene(sceneName: string) {
+        engine.scene = new Scene();
+
+        const sceneRoot = await engine.network.requestSceneRoot(sceneName);
 
         const handleSceneObject = async (parent: GameObject, sceneObject: SceneObject) => {
             let gameObject: GameObject;
@@ -61,16 +63,14 @@ export class Loader {
             gameObject.components.add(syncComponent);
             gameObject.components.add(colliderComponent);
 
-            engine.tree.addChild(parent, gameObject);
+            engine.scene.tree.addChild(parent, gameObject);
 
             for(const child of sceneObject.children) {
                 await handleSceneObject(gameObject, child);
             }
         }
 
-        await handleSceneObject(engine.tree.root, sceneRoot);
-
-        return new Scene();
+        await handleSceneObject(engine.scene.tree.root, sceneRoot);
     }
 
     async loadShapeMesh(type: ShapeType) {
@@ -132,7 +132,7 @@ class OBJParser {
         for(const model of obj.models) {
             const child = this.parseModel(model);
 
-            engine.tree.addChild(gameObject, child);
+            engine.scene.tree.addChild(gameObject, child);
 
             this.vertexOffset += model.vertices.length;
             this.textureOffset += model.textureCoords.length;

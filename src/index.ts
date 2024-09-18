@@ -17,10 +17,10 @@ async function main() {
 
     await engine.init(device, root);
 
-    engine.scene = await engine.loader.loadScene("scene1");
+    await engine.loader.loadScene("scene1");
 
     // create camera
-    const cameraObject = engine.tree.spawnGameObject();
+    const cameraObject = engine.scene.tree.spawnGameObject();
     cameraObject.transform.position = vec3.fromValues(0, 2, 5);
 
     // const controller = new FreeCameraController();
@@ -33,14 +33,13 @@ async function main() {
     engine.scene.mainCamera = camera;
 
     // create direct light
-    const directLightObject = engine.tree.spawnGameObject();
+    const directLightObject = engine.scene.tree.spawnGameObject();
     const directLight = new DirectLight();
     directLightObject.transform.rotate(quat.fromEuler(-Math.PI/4, -Math.PI/4, 0, 'yxz'));
     directLightObject.components.add(directLight);
 
-
     const playerData = await engine.network.requestPlayerData();
-    const playerObject = engine.tree.getGameObjectByID(playerData.gameObjectID);
+    const playerObject = engine.scene.tree.getGameObjectByID(playerData.gameObjectID);
 
     controller.setCharacterObject(playerObject);
 

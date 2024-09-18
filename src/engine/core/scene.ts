@@ -1,4 +1,4 @@
-import { engine, EngineEventListener } from ".";
+import { engine, EngineEventListener, Tree } from ".";
 import { Mesh, Camera, DirectLight, PointLight, Sync, Collider } from "../components";
 
 interface SceneComponents {
@@ -11,6 +11,14 @@ interface SceneComponents {
 export class Scene extends EngineEventListener {
     mainCamera: Camera;
 
+    tree: Tree;
+
+    constructor() {
+        super();
+
+        this.tree = new Tree();
+    }
+
     // TODO: use caching
     getSceneComponents(): SceneComponents {
         const meshes:       Mesh[]        = [];
@@ -18,7 +26,7 @@ export class Scene extends EngineEventListener {
         const directLights: DirectLight[] = [];
         const pointLights:  PointLight[]  = [];
 
-        engine.tree.traverse(gameObject => {
+        this.tree.traverse(gameObject => {
             if(!gameObject.visible)
                 return;
 

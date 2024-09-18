@@ -20,7 +20,6 @@ export class Engine {
     network: Network;
     scene: Scene;
     input: Input;
-    tree: Tree;
     loader: Loader;
     renderer: Renderer;
 
@@ -42,7 +41,6 @@ export class Engine {
         await this.network.open();
 
         this.input    = new Input();
-        this.tree     = new Tree();
         this.loader   = new Loader();
         this.renderer = new Renderer();
 
@@ -78,7 +76,7 @@ export class Engine {
         const render = () => {
             EngineEventListener.beforeRender();
 
-            this.tree.updateTransforms();
+            this.scene.tree.updateTransforms();
             this.renderer.render();
 
             EngineEventListener.afterRender();

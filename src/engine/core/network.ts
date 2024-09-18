@@ -116,7 +116,7 @@ export class Network extends EngineEventListener {
 
     private sync(message: SyncResponse) {
         for(const transform of message.transform) {
-            const gameObject = engine.tree.getGameObjectByID(transform.gameObjectID);
+            const gameObject = engine.scene.tree.getGameObjectByID(transform.gameObjectID);
 
             if(!gameObject)
                 continue;
